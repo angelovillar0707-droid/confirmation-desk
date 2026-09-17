@@ -1,0 +1,608 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Confirmation Desk</title>
+<style id="page-style">
+  :root{
+    --bg:#eef1f3; --surface:#ffffff; --surface-2:#f6f8f9; --border:#d8dfe4;
+    --text:#182430; --text-dim:#59707d; --accent:#0b6e4f; --accent-ink:#ffffff;
+    --accent-soft:#e3f2ea; --warn:#a15c00; --warn-soft:#fbeed9; --danger:#b3261e;
+    --danger-soft:#fbe6e3; --gold:#9a6b00; --shadow:0 1px 2px rgba(20,30,40,.06),0 8px 24px rgba(20,30,40,.06);
+    --radius:10px;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#10161a; --surface:#171f24; --surface-2:#1c252b; --border:#2b363d;
+      --text:#e8eef1; --text-dim:#9db0bb; --accent:#3fc98d; --accent-ink:#08130f;
+      --accent-soft:#173428; --warn:#e3ab5c; --warn-soft:#2e2413; --danger:#f0796d;
+      --danger-soft:#331e1c; --gold:#d9b154; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    }
+  }
+  :root[data-theme="dark"]{
+    --bg:#10161a; --surface:#171f24; --surface-2:#1c252b; --border:#2b363d;
+    --text:#e8eef1; --text-dim:#9db0bb; --accent:#3fc98d; --accent-ink:#08130f;
+    --accent-soft:#173428; --warn:#e3ab5c; --warn-soft:#2e2413; --danger:#f0796d;
+    --danger-soft:#331e1c; --gold:#d9b154; --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box;}
+  body{background:var(--bg); color:var(--text); font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased;}
+  h1,h2,h3,.brand,nav.side .label{font-family:"Archivo","Segoe UI",sans-serif;}
+  h1,h2,h3{text-wrap:balance; margin:0 0 .4em;}
+  table{font-variant-numeric:tabular-nums;}
+  code,.mono{font-family:"IBM Plex Mono",ui-monospace,monospace;}
+  a{color:var(--accent);}
+  #app{display:flex; min-height:100%;}
+
+  /* ---- sidebar ---- */
+  .side{
+    width:250px; flex:none; background:var(--surface); border-right:1px solid var(--border);
+    padding:20px 14px; position:sticky; top:0; align-self:flex-start; height:100vh; overflow-y:auto;
+  }
+  .brand{display:flex; align-items:center; gap:10px; padding:4px 8px 18px; border-bottom:1px solid var(--border); margin-bottom:14px;}
+  .brand .mark{width:34px; height:34px; border-radius:9px; background:var(--accent); color:var(--accent-ink); display:flex; align-items:center; justify-content:center; font-size:18px; flex:none;}
+  .brand .txt{line-height:1.15;}
+  .brand .txt strong{display:block; font-size:15px; font-weight:800;}
+  .brand .txt span{display:block; font-size:11.5px; color:var(--text-dim);}
+  .side .group{margin:16px 0;}
+  .side .label{display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); padding:0 10px 6px;}
+  .side button.navlink{
+    display:flex; align-items:center; gap:10px; width:100%; text-align:left; background:none; border:none;
+    color:var(--text); font:inherit; font-size:14px; padding:9px 10px; border-radius:8px; cursor:pointer;
+  }
+  .side button.navlink .ic{width:20px; text-align:center; flex:none;}
+  .side button.navlink:hover{background:var(--surface-2);}
+  .side button.navlink[aria-current="true"]{background:var(--accent-soft); color:var(--accent); font-weight:700;}
+
+  /* ---- main ---- */
+  .main{flex:1; min-width:0; padding:28px 34px 60px;}
+  .topbar{display:none;}
+  .pagehead{margin-bottom:22px;}
+  .pagehead .eyebrow{font-size:12px; letter-spacing:.08em; text-transform:uppercase; color:var(--accent); font-weight:700; margin-bottom:6px;}
+  .pagehead h1{font-size:26px; font-weight:800;}
+  .pagehead p{color:var(--text-dim); margin:.35em 0 0; max-width:62ch;}
+  section.view{display:none;}
+  section.view[data-active="true"]{display:block;}
+
+  .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:20px;}
+  .card > h2{font-size:17px; font-weight:800; margin-bottom:2px;}
+  .card > .sub{color:var(--text-dim); font-size:13.5px; margin-bottom:14px;}
+
+  .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px;}
+  .tile{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
+  .tile .k{font-size:11.5px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-dim); margin-bottom:6px;}
+  .tile .v{font-size:22px; font-weight:800;}
+  .tile .d{font-size:12.5px; margin-top:4px; color:var(--text-dim);}
+  .tile .d.up{color:var(--accent);}
+  .tile .d.down{color:var(--danger);}
+
+  .tablewrap{overflow-x:auto; border:1px solid var(--border); border-radius:var(--radius);}
+  table.grid{border-collapse:collapse; width:100%; min-width:600px; font-size:13.5px;}
+  table.grid th, table.grid td{padding:8px 12px; border-bottom:1px solid var(--border); text-align:left; white-space:nowrap;}
+  table.grid thead th{position:sticky; top:0; background:var(--surface-2); color:var(--text-dim); font-size:11.5px; text-transform:uppercase; letter-spacing:.04em; z-index:1;}
+  table.grid tbody tr:hover{background:var(--surface-2);}
+  table.grid tbody tr.total-row{font-weight:800; background:var(--surface-2);}
+  table.grid td.num, table.grid th.num{text-align:right;}
+  table.grid td.wrap{white-space:normal; min-width:260px; line-height:1.45;}
+  .rank1{color:var(--gold); font-weight:800;}
+  .pill{display:inline-block; padding:2px 9px; border-radius:99px; font-size:12px; font-weight:700;}
+  .pill.up{background:var(--accent-soft); color:var(--accent);}
+  .pill.down{background:var(--danger-soft); color:var(--danger);}
+  .pill.flat{background:var(--surface-2); color:var(--text-dim);}
+
+  .stagejump{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .stagejump a{font-size:12.5px; padding:6px 11px; border:1px solid var(--border); border-radius:99px; text-decoration:none; color:var(--text); background:var(--surface);}
+  .stagejump a:hover{border-color:var(--accent); color:var(--accent);}
+  .stage{margin-bottom:22px; scroll-margin-top:20px;}
+  .stage h3{font-size:15px; font-weight:800; display:flex; align-items:center; gap:8px;}
+  .stage h3 .no{background:var(--accent); color:var(--accent-ink); width:22px; height:22px; border-radius:6px; display:inline-flex; align-items:center; justify-content:center; font-size:12px;}
+  .stage .body{font-size:14px; line-height:1.6; color:var(--text);}
+  .stage .body p{margin:.6em 0;}
+  .script{background:var(--surface-2); border-left:3px solid var(--accent); border-radius:0 8px 8px 0; padding:10px 14px; font-size:13.5px; font-style:italic; color:var(--text-dim); margin:.7em 0;}
+  .pathgrid{display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:14px; margin:.8em 0; align-items:start;}
+  .pathcard{background:var(--surface-2); border:1px solid var(--border); border-radius:8px; padding:14px 16px; font-size:13px; line-height:1.55;}
+  .pathcard h4{margin:0 0 10px; font-size:14px; font-weight:800; color:var(--accent);}
+  .pathcard .step{margin:0 0 10px;}
+  .pathcard .step:last-child{margin-bottom:0;}
+  .pathcard .step b{display:block; font-size:12.5px; color:var(--text);}
+  .pathcard .offer{margin-top:14px; padding:11px 13px; background:var(--surface); border:1px dashed var(--accent); border-radius:7px;}
+  .pathcard .offer .lbl{font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--accent); font-weight:800; margin-bottom:7px; display:block;}
+  .pathcard .offer ol, .pathcard .offer ul{margin:0; padding-left:18px;}
+  .pathcard .offer li{margin-bottom:3px;}
+  .pathcard .offer li:last-child{margin-bottom:0;}
+
+  .formrow{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:10px;}
+  .formrow label{display:block; font-size:12px; color:var(--text-dim); margin-bottom:4px;}
+  .formrow input, .formrow select{width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:7px; background:var(--surface); color:var(--text); font:inherit; font-size:13.5px;}
+  .formrow input:focus, .formrow select:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .btn{background:var(--accent); color:var(--accent-ink); border:none; padding:9px 16px; border-radius:8px; font:inherit; font-weight:700; font-size:13.5px; cursor:pointer;}
+  .btn:hover{filter:brightness(1.06);}
+  .btn:disabled{opacity:.5; cursor:not-allowed;}
+  .savemsg{font-size:12.5px; color:var(--text-dim); margin-top:8px; min-height:1.2em;}
+  .savemsg.ok{color:var(--accent);}
+  .badge-added{font-size:11px; background:var(--accent-soft); color:var(--accent); padding:1px 7px; border-radius:99px; margin-left:6px;}
+
+  .mobilebar{display:none;}
+  @media (max-width:860px){
+    #app{display:block;}
+    .side{position:fixed; inset:0 auto 0 0; transform:translateX(-100%); transition:transform .2s ease; z-index:20; width:78vw; max-width:280px; box-shadow:var(--shadow);}
+    .side.open{transform:translateX(0);}
+    .mobilebar{display:flex; align-items:center; gap:10px; position:sticky; top:0; z-index:10; background:var(--surface); border-bottom:1px solid var(--border); padding:calc(10px + env(safe-area-inset-top,0px)) 14px 10px;}
+    .mobilebar button{background:none; border:1px solid var(--border); border-radius:8px; width:36px; height:36px; font-size:16px; color:var(--text);}
+    .mobilebar strong{font-size:14px; font-family:"Archivo",sans-serif;}
+    .scrim{display:none; position:fixed; inset:0; background:rgba(10,15,18,.4); z-index:15;}
+    .scrim.show{display:block;}
+    .main{padding:18px 16px 50px;}
+    .pagehead h1{font-size:22px;}
+  }
+</style>
+
+<div id="app"></div>
+
+<script id="page-script">
+var ACTIVE = "ranking";
+var STATE = {"offRequests":[{"name":"Raysan Garganta","off1":"Monday","off2":"Tuesday","shift":"Morning","reason":"","added":false},{"name":"Marianne Visda","off1":"Tuesday","off2":"Wednesday","shift":"Morning","reason":"","added":false},{"name":"Karen Dilig","off1":"Wednesday","off2":"Sunday","shift":"Afternoon","reason":"Officer duty / church","added":false},{"name":"Joyce Malapitan","off1":"Wednesday","off2":"Sunday","shift":"Morning","reason":"Weekly visit to parents in Bulacan","added":false},{"name":"Bhea Cuenca","off1":"Wednesday","off2":"Thursday","shift":"Morning","reason":"Check-up and vaccination date for my child","added":false}]};
+
+var RANKING = [
+  {agent:"Joyce Malapitan",score:24,conv:"16.44%",total:92.9,rank:1},
+  {agent:"Mary Fontanilla",score:28,conv:"10.37%",total:81.5,rank:2},
+  {agent:"Merly Palomares",score:24,conv:"12.57%",total:81.1,rank:3},
+  {agent:"Dhanica Dadoya",score:26,conv:"11.40%",total:81.1,rank:3},
+  {agent:"Jubel Siagan",score:14,conv:"14.43%",total:68.9,rank:5},
+  {agent:"Sharon SanJuan",score:19,conv:"11.11%",total:67.7,rank:6},
+  {agent:"Jonaliza Guevarra",score:18,conv:"10.59%",total:64.4,rank:7},
+  {agent:"Reynalyn Roco",score:15,conv:"10.42%",total:58.5,rank:8},
+  {agent:"Christian Tad-y",score:16,conv:"8.12%",total:53.3,rank:9},
+  {agent:"Filipina Bonifacio",score:15,conv:"8.06%",total:51.3,rank:10},
+  {agent:"Marianne Visda",score:13,conv:"6.84%",total:44,rank:11},
+  {agent:"Raysan Garganta",score:12,conv:"6.98%",total:42.7,rank:12},
+  {agent:"Trina Idaloy",score:11,conv:"5.14%",total:35.3,rank:13},
+  {agent:"Karen Dilig",score:9,conv:"4.05%",total:28.4,rank:14},
+  {agent:"Carmina Fernandez",score:7,conv:"4.90%",total:27.4,rank:15},
+  {agent:"Jasmin Aruta",score:7,conv:"3.93%",total:24.5,rank:16},
+  {agent:"John Jamero",score:5,conv:"3.79%",total:20.5,rank:17},
+  {agent:"Bhea Cuenca",score:4,conv:"2.80%",total:15.7,rank:18},
+  {agent:"Lanlie Mayor",score:4,conv:"2.70%",total:15.4,rank:19}
+].sort(function(a,b){return a.rank-b.rank;});
+
+var PERF = {
+  rows:[
+    {a:"Mary Fontanilla",cur:71,prev:58,diff:"+13",pct:"22%",avg:"₱2,533.96",calls:447,conv:"16%"},
+    {a:"Merly Palomares",cur:48,prev:39,diff:"+9",pct:"23%",avg:"₱2,926.33",calls:330,conv:"15%"},
+    {a:"Sharon SanJuan",cur:44,prev:26,diff:"+18",pct:"69%",avg:"₱2,942.02",calls:323,conv:"14%"},
+    {a:"Dhanica Dadoya",cur:50,prev:35,diff:"+15",pct:"43%",avg:"₱2,376.84",calls:385,conv:"13%"},
+    {a:"Jonaliza Guevarra",cur:29,prev:0,diff:"+29",pct:"2900%",avg:"₱2,682.76",calls:244,conv:"12%"},
+    {a:"Reynalyn Roco",cur:26,prev:19,diff:"+7",pct:"37%",avg:"₱2,877.54",calls:136,conv:"19%"},
+    {a:"Christian Tad-y",cur:26,prev:21,diff:"+5",pct:"24%",avg:"₱2,582.23",calls:328,conv:"8%"},
+    {a:"Jubel Siagan",cur:39,prev:24,diff:"+15",pct:"63%",avg:"₱2,975.62",calls:184,conv:"21%"},
+    {a:"Joyce Malapitan",cur:39,prev:31,diff:"+8",pct:"26%",avg:"₱2,413.15",calls:204,conv:"19%"},
+    {a:"Jasmin Aruta",cur:26,prev:14,diff:"+12",pct:"86%",avg:"₱2,578.27",calls:263,conv:"10%"},
+    {a:"Karen Dilig",cur:31,prev:0,diff:"+31",pct:"3100%",avg:"₱2,837.29",calls:330,conv:"9%"},
+    {a:"Marianne Visda",cur:31,prev:29,diff:"+2",pct:"7%",avg:"₱2,528.39",calls:294,conv:"11%"},
+    {a:"Filipina Bonifacio",cur:30,prev:35,diff:"-5",pct:"-14%",avg:"₱2,758.97",calls:316,conv:"9%"},
+    {a:"Trina Idaloy",cur:16,prev:11,diff:"+5",pct:"45%",avg:"₱2,513.56",calls:240,conv:"7%"},
+    {a:"Raysan Garganta",cur:25,prev:11,diff:"+14",pct:"127%",avg:"₱2,638.64",calls:273,conv:"9%"},
+    {a:"Bhea Cuenca",cur:10,prev:0,diff:"+10",pct:"1000%",avg:"₱2,500.00",calls:140,conv:"7%"},
+    {a:"John Jamero",cur:8,prev:10,diff:"-2",pct:"-20%",avg:"₱2,586.50",calls:143,conv:"6%"},
+    {a:"Carmina Fernandez",cur:12,prev:16,diff:"-4",pct:"-25%",avg:"₱2,675.50",calls:234,conv:"5%"},
+    {a:"Lanlie Mayor",cur:12,prev:25,diff:"-13",pct:"-52%",avg:"₱2,514.75",calls:248,conv:"5%"}
+  ],
+  total:{cur:573,prev:404,diff:"+169",pct:"42%",avg:"₱2,781.64",calls:"5,062",conv:"11%"},
+  august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"₱2,514.73",avgPrev:"₱2,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
+};
+
+var GIFTS = [
+  ["Easy Go Max","Easy Go","Easy Go"],["Arti-flex","Easy Go","Easy Go"],["Optiheal","Easy Go","Easy Go"],
+  ["Footurel","Easy Go","Easy Go"],["Variflex","Easy Go","Easy Go"],["D-Up","Prostaman","Prostaman"],
+  ["Vitaman Plus","Prostaman","Prostaman"],["Prostaman","Easy Go","Easy Go"],["Neo Card Potency","Prostaman","Prostaman"],
+  ["TensoLumen","Easy Go","Variflex"],["Neocardia","Easy Go","Variflex"],["Glucofortis","Footurel Gel","Variflex"],
+  ["Ketonica","Variflex","Retinlift"],["Wellatox","Variflex","Retinlift"],["Rootera","Variflex","Retinlift"],
+  ["Retinlift","Footurel Gel","Variflex"],["Easy Go","Easy Go","Easy Go"]
+];
+
+var REDELIVERY = {
+  reject:[
+    ["Order Already Received from Us","The customer informs us that they have already received the order from us."],
+    ["No Response","The customer has consistently not responded, and no further attempts will be made. Automatic rejection only — not for manual use."],
+    ["Unwilling to Pay Delivery Fee","The customer refuses to pay the delivery fee and does not want to redeem the package."],
+    ["Unsatisfactory Delivery Conditions","The customer is dissatisfied with the delivery conditions and opts to reject the order."],
+    ["Advised Against Purchase by Doctor","The customer was advised by a doctor not to proceed with the purchase."],
+    ["Advised Against Purchase by Relative","The customer decided not to purchase based on advice from a family member."],
+    ["Insufficient Funds","The customer cannot afford the purchase due to a lack of funds."],
+    ["Cannot Pay in Cash","The customer is unable to pay in cash and does not want to redeem the package."],
+    ["Needs a Discount","The customer refuses to proceed without a discount."],
+    ["Did Not Place an Order","The customer claims they did not place the order."],
+    ["Refusal Without Explanation","The customer refuses the package without giving a reason."],
+    ["Doubts About Product Quality","The customer has concerns about product quality."],
+    ["Requires Specific Documentation","The customer demands documentation that isn't available."],
+    ["Purchased from Another Source","The customer already bought the product elsewhere."],
+    ["Negative Reviews or Feedback","The customer decides against the purchase due to negative reviews or feedback."]
+  ],
+  approve:[
+    ["Unwilling to Pay Delivery Fee","Customer initially refused over the delivery fee but now agrees to proceed."],
+    ["Unsatisfactory Delivery Conditions","Customer initially refused but now accepts redelivery with improved conditions."],
+    ["Advised Against Purchase by Doctor","Customer was advised against it by a doctor but has changed their mind."],
+    ["Advised Against Purchase by Relative","Customer initially refused on a relative's advice but has now decided to proceed."],
+    ["Insufficient Funds","Customer originally declined for lack of funds but now confirms they can pay."],
+    ["Cannot Pay in Cash","Customer initially couldn't pay cash but now can."],
+    ["Needs a Discount","Customer originally refused without a discount but is now willing to proceed with the offered terms."],
+    ["Refusal Without Explanation","Customer initially refused with no reason but has since agreed to proceed."],
+    ["Doubts About Product Quality","Customer had quality concerns but now agrees to receive the order after reassurance."],
+    ["Requires Specific Documentation","Customer demanded documentation but is now willing to proceed without it."],
+    ["Purchased from Another Source","Customer bought elsewhere initially but is now willing to accept our redelivery."],
+    ["Negative Reviews or Feedback","Customer initially refused over negative reviews but has reconsidered."]
+  ]
+};
+
+var SCHEDULE = [
+  {agent:"Jubel",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","",""]},
+  {agent:"—",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
+  {agent:"Marianne",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
+  {agent:"Joyce",days:["08:00-17:00","","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
+  {agent:"Merly",days:["08:00-17:00","08:00-17:00","","","08:00-17:00","08:00-17:00","08:00-17:00"]},
+  {agent:"John",days:["08:00-17:00","08:00-17:00","08:00-17:00","","","08:00-17:00","08:00-17:00"]},
+  {agent:"Dhanica",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","","","08:00-17:00"]},
+  {agent:"Sharon",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","",""]},
+  {agent:"Jasmin",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
+  {agent:"—",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
+  {agent:"—",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"Reynalyn",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]},
+  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00"]},
+  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","",""]},
+  {agent:"—",days:["","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"—",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"—",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]}
+];
+
+var CALLBACKS = [
+  {agent:"Christian",hash:"X3Kg1aYg8n1zwJA",type:"Remarketing",date:"Sept 21",reason:"Wants to be a reseller"},
+  {agent:"Christian",hash:"Zv5b0gZ84L1GXEQ",type:"Remarketing",date:"Sept 11",reason:"Pension"},
+  {agent:"Sharon",hash:"Y6d798wkg30jykr",type:"Remarketing",date:"Sept 18",reason:"Will have money on this day"},
+  {agent:"Karen Dilig",hash:"#nWVJ1dppxB1LMrv",type:"Remarketing",date:"Sept 20",reason:"Money sent by wife"},
+  {agent:"Jasmin",hash:"Sale #LXWl16lzeE9v5NV",type:"Remarketing",date:"Sept 30",reason:"Payday"},
+  {agent:"Mary",hash:"3Qkm9MRRRwOMxWA",type:"Remarketing",date:"Sept 30",reason:"Money this day"},
+  {agent:"Merly",hash:"#yGDQ14XZ4Q1egom",type:"Remarketing",date:"Oct 16",reason:"Available money, callback 8am"},
+  {agent:"Merly",hash:"#mQEY9beWYW0Lk2b",type:"Remarketing",date:"Oct 15",reason:"Available fund, callback 12nn"},
+  {agent:"Carmina",hash:"#dRb7OJRE54OkqPL",type:"Remarketing",date:"Oct 20",reason:"Pension day"},
+  {agent:"Bhea Cuenca",hash:"#LBwn1lXkBv1KNGz",type:"Remarketing",date:"Sept 22",reason:"Recently discharged from hospital"},
+  {agent:"Trina",hash:"#Mj4NOV2dVwOElXv",type:"Remarketing",date:"Sept 15",reason:"Callback at 4:40"},
+  {agent:"sharon",hash:"kQ3W9rA7jp0JaMD",type:"Remarketing",date:"Sept 30",reason:"Gets salary this day"}
+];
+var REFERRALS = [
+  {agent:"Dhanica",prevHash:"yPXV1EREEe0j6zE",prevClient:"Gaspas Monoten P",name:"Juanita Monoten",contact:"9177988617",relation:"Spouse",product:"Glucofortis"},
+  {agent:"Filipina",prevHash:"ZMVW1WRyP7ObwvA",prevClient:"Juna L Jabla",name:"Junmar Lawas",contact:"9758895982",relation:"Sibling",product:"Glucofortis"},
+  {agent:"Jona",prevHash:"Sale #LBwn1lX3DM1KNGz",prevClient:"Josie Castillo Peralta",name:"Josie Castillo Peralta",contact:"—",relation:"Same client, new number",product:"Easy Go Max"},
+  {agent:"Sharon",prevHash:"ogvzOLRDXo0EqYW",prevClient:"Jessie Mangay",name:"Ganie Raganas Mangay",contact:"9502667914",relation:"Client's uncle",product:"Vitaman Plus"}
+];
+
+function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function pillPct(p){
+  var neg = /^-/.test(p);
+  return '<span class="pill '+(neg?"down":"up")+'">'+esc(p)+'</span>';
+}
+
+function renderNav(active, sections){
+  var groups = [
+    {label:"Performance", items:["ranking","performance"]},
+    {label:"Team", items:["shifts"]},
+    {label:"Playbooks", items:["remarketing","notordered"]},
+    {label:"Reference", items:["gifts","redelivery"]},
+    {label:"Follow-up", items:["callbacks"]}
+  ];
+  var html = groups.map(function(g){
+    var items = g.items.map(function(id){
+      var s = sections[id];
+      return '<button class="navlink" data-nav="'+id+'" aria-current="'+(id===active?"true":"false")+'"><span class="ic">'+s.icon+'</span>'+s.label+'</button>';
+    }).join("");
+    return '<div class="group"><span class="label">'+g.label+'</span>'+items+'</div>';
+  }).join("");
+  return html;
+}
+
+var SECTIONS = {
+  ranking:{icon:"🏆", label:"Ranking & Score", eyebrow:"Performance", title:"Ranking & Score", desc:"Weekly agent ranking by score and confirmation-call conversion rate."},
+  performance:{icon:"📈", label:"Performance Update", eyebrow:"Performance", title:"Performance Update", desc:"Month-to-date confirmed orders vs. the same point last month, by agent."},
+  shifts:{icon:"📅", label:"Shift & Time-Off", eyebrow:"Team", title:"Shift & Time-Off Requests", desc:"This week's shift schedule, plus a running sign-up sheet for day-off requests."},
+  remarketing:{icon:"☎️", label:"Remarketing Call Flow", eyebrow:"Playbook", title:"Remarketing Call Flow", desc:"Script and decision paths for reconnecting with past customers."},
+  notordered:{icon:"🔍", label:"Not-Ordered Script", eyebrow:"Playbook", title:"Not-Ordered Algo", desc:"How to handle a customer who doesn't recognize the order on file."},
+  gifts:{icon:"🎁", label:"Free Gift Guide", eyebrow:"Reference", title:"Free Gift Guide", desc:"Which free gift to offer by product and recipient gender."},
+  redelivery:{icon:"📦", label:"Redelivery Reasons", eyebrow:"Reference", title:"Redelivery Tagging", desc:"Standard reason codes for rejected orders and for redelivery approvals."},
+  callbacks:{icon:"☎️", label:"Manual Callbacks", eyebrow:"Follow-up", title:"Manual Callbacks", desc:"Scheduled callback list and open referral leads."}
+};
+
+function rankingView(){
+  var rows = RANKING.map(function(r,i){
+    var rankCell = r.rank===1 ? '<span class="rank1">#1</span>' : ("#"+r.rank);
+    return '<tr><td class="num">'+rankCell+'</td><td>'+esc(r.agent)+'</td><td class="num">'+r.score+'</td><td class="num">'+esc(r.conv)+'</td><td class="num">'+r.total+'</td></tr>';
+  }).join("");
+  return '' +
+  '<div class="card">' +
+    '<h2>Weekly ranking</h2><div class="sub">Sorted by rank — total score blends call volume, conversion, and quality checks.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th class="num">Rank</th><th>Agent</th><th class="num">Weekly Score</th><th class="num">Conversion %</th><th class="num">Total Score</th></tr></thead><tbody>'+rows+'</tbody></table></div>' +
+  '</div>' +
+  '<div class="card"><h2>A note on this tab</h2><div class="sub" style="margin-bottom:0">The sheet also has a larger monthly figures block next to this table without header labels I could confidently match to columns — rather than guess at what each number means, it’s left out here. Happy to add it once the column meanings are confirmed.</div></div>';
+}
+
+function performanceView(){
+  var rows = PERF.rows.slice().sort(function(a,b){return b.cur-a.cur;}).map(function(r){
+    return '<tr><td>'+esc(r.a)+'</td><td class="num">'+r.cur+'</td><td class="num">'+r.prev+'</td><td class="num">'+r.diff+'</td><td class="num">'+pillPct(r.pct)+'</td><td class="num">'+esc(r.avg)+'</td><td class="num">'+r.calls+'</td><td class="num">'+esc(r.conv)+'</td></tr>';
+  }).join("");
+  var t = PERF.total, a = PERF.august;
+  return '' +
+  '<div class="tiles">' +
+    '<div class="tile"><div class="k">Confirmed Orders (MTD)</div><div class="v">'+t.cur+'</div><div class="d up">'+t.diff+' vs. same date last month ('+t.pct+')</div></div>' +
+    '<div class="tile"><div class="k">Average Check</div><div class="v">'+esc(t.avg)+'</div><div class="d">vs. ₱2,627.10 last month</div></div>' +
+    '<div class="tile"><div class="k">Calls Handled</div><div class="v">'+t.calls+'</div><div class="d">Conversion '+esc(t.conv)+'</div></div>' +
+    '<div class="tile"><div class="k">Full Month (August)</div><div class="v">'+a.cur+'</div><div class="d up">'+a.diff+' vs. July ('+a.pct+')</div></div>' +
+  '</div>' +
+  '<div class="card">' +
+    '<h2>Agents — month to date</h2><div class="sub">Current MTD confirmed orders vs. the same date last month, sorted by current volume.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Agent</th><th class="num">Current MTD</th><th class="num">Previous MTD</th><th class="num">Difference</th><th class="num">% Change</th><th class="num">Avg. Check</th><th class="num">Calls Handled</th><th class="num">Conversion</th></tr></thead><tbody>'+rows+
+    '<tr class="total-row"><td>Total</td><td class="num">'+t.cur+'</td><td class="num">'+t.prev+'</td><td class="num">'+t.diff+'</td><td class="num">'+t.pct+'</td><td class="num">'+esc(t.avg)+'</td><td class="num">'+t.calls+'</td><td class="num">'+t.conv+'</td></tr>' +
+    '</tbody></table></div>' +
+  '</div>' +
+  '<div class="card">' +
+    '<h2>Full-month comparison — August</h2><div class="sub">Whole-month totals, current vs. previous.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th></th><th class="num">Confirmed Orders</th><th class="num">Avg. Check</th><th class="num">Calls Handled</th><th class="num">Conversion</th></tr></thead><tbody>' +
+    '<tr><td>Current</td><td class="num">'+a.cur+'</td><td class="num">'+esc(a.avgCur)+'</td><td class="num">'+a.callsCur+'</td><td class="num">'+a.convCur+'</td></tr>' +
+    '<tr><td>Previous</td><td class="num">'+a.prev+'</td><td class="num">'+esc(a.avgPrev)+'</td><td class="num">'+a.callsPrev+'</td><td class="num">'+a.convPrev+'</td></tr>' +
+    '</tbody></table></div>' +
+  '</div>';
+}
+
+function scheduleView(){
+  var head = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
+  var rows = SCHEDULE.map(function(r,i){
+    var cells = r.days.map(function(d){return '<td class="num">'+(d||"—")+'</td>';}).join("");
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.agent)+'</td>'+cells+'</tr>';
+  }).join("");
+  return '<div class="tablewrap"><table class="grid"><thead><tr><th>#</th><th>Agent</th>'+head.map(function(h){return '<th class="num">'+h+'</th>';}).join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
+}
+
+function offRequestRows(){
+  return STATE.offRequests.map(function(r,i){
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+(r.added?'<span class="badge-added">added</span>':'')+'</td><td>'+esc(r.off1)+'</td><td>'+esc(r.off2)+'</td><td>'+esc(r.shift)+'</td><td class="wrap">'+esc(r.reason||"—")+'</td></tr>';
+  }).join("");
+}
+
+function shiftsView(){
+  return '' +
+  '<div class="card">' +
+    '<h2>This week’s shift schedule</h2><div class="sub">Assigned working hours, Monday through Sunday.</div>' +
+    scheduleView() +
+  '</div>' +
+  '<div class="card">' +
+    '<h2>Day-off requests</h2><div class="sub">Add your name below to request a day off.</div>' +
+    '<div class="tablewrap"><table class="grid" id="offtable"><thead><tr><th>#</th><th>Agent</th><th>Off Day 1</th><th>Off Day 2</th><th>Shift</th><th>Reason</th></tr></thead><tbody>'+offRequestRows()+'</tbody></table></div>' +
+    '<h3 style="margin-top:18px;font-size:14px;">Add your request</h3>' +
+    '<form id="offform" autocomplete="off">' +
+      '<div class="formrow">' +
+        '<div><label for="f-name">Your name</label><input id="f-name" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
+        '<div><label for="f-off1">Off Day 1</label><select id="f-off1"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>' +
+        '<div><label for="f-off2">Off Day 2</label><select id="f-off2"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option selected>Sunday</option></select></div>' +
+        '<div><label for="f-shift">Shift</label><select id="f-shift"><option>Morning</option><option>Afternoon</option><option>Evening</option></select></div>' +
+      '</div>' +
+      '<div class="formrow" style="grid-template-columns:1fr;">' +
+        '<div><label for="f-reason">Reason (optional)</label><input id="f-reason" maxlength="120" placeholder="e.g. family event, appointment"></div>' +
+      '</div>' +
+      '<button type="submit" class="btn" id="f-submit">Add my name</button>' +
+      '<div class="savemsg" id="f-msg"></div>' +
+    '</form>' +
+  '</div>';
+}
+
+function giftsView(){
+  var rows = GIFTS.map(function(g){return '<tr><td>'+esc(g[0])+'</td><td>'+esc(g[1])+'</td><td>'+esc(g[2])+'</td></tr>';}).join("");
+  return '<div class="card"><h2>Free gift by product</h2><div class="sub">Offer the matching free gift based on the customer’s product and gender.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Product</th><th>Male Gift</th><th>Female Gift</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
+}
+
+function redeliveryView(){
+  var rj = REDELIVERY.reject.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="wrap">'+esc(r[1])+'</td></tr>';}).join("");
+  var ap = REDELIVERY.approve.map(function(r){return '<tr><td>'+esc(r[0])+'</td><td class="wrap">'+esc(r[1])+'</td></tr>';}).join("");
+  return '' +
+  '<div class="card"><h2>Rejection reasons</h2><div class="sub">Tag these when a customer declines the order.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Reason</th><th>Description</th></tr></thead><tbody>'+rj+'</tbody></table></div></div>' +
+  '<div class="card"><h2>Approve reasons</h2><div class="sub">Use these when a customer reverses an earlier refusal and agrees to receive the redelivery.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Reason</th><th>Description</th></tr></thead><tbody>'+ap+'</tbody></table></div></div>';
+}
+
+function callbacksView(){
+  var cb = CALLBACKS.map(function(c){return '<tr><td>'+esc(c.agent)+'</td><td class="mono">'+esc(c.hash)+'</td><td>'+esc(c.type)+'</td><td>'+esc(c.date)+'</td><td class="wrap">'+esc(c.reason)+'</td></tr>';}).join("");
+  var rf = REFERRALS.map(function(r){return '<tr><td>'+esc(r.agent)+'</td><td>'+esc(r.prevClient)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.contact)+'</td><td>'+esc(r.relation)+'</td><td>'+esc(r.product)+'</td></tr>';}).join("");
+  return '' +
+  '<div class="card"><h2>Scheduled callbacks</h2><div class="sub">Open remarketing callbacks and the reason given for the requested date.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Agent</th><th>Order Hash</th><th>Type</th><th>Callback Date</th><th>Reason</th></tr></thead><tbody>'+cb+'</tbody></table></div></div>' +
+  '<div class="card"><h2>Referrals & recommendations</h2><div class="sub">New leads referred by an existing customer.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Agent</th><th>Referred By</th><th>New Contact</th><th>Number</th><th>Relationship</th><th>Product</th></tr></thead><tbody>'+rf+'</tbody></table></div></div>';
+}
+
+function stage(no,title,bodyHtml,id){
+  return '<div class="stage" id="'+id+'"><h3><span class="no">'+no+'</span>'+esc(title)+'</h3><div class="body">'+bodyHtml+'</div></div>';
+}
+
+function pathStep(label, text){
+  return '<div class="step"><b>'+esc(label)+'</b>'+text+'</div>';
+}
+function offerBox(items){
+  return '<div class="offer"><span class="lbl">Offer</span><ol>'+items.map(function(i){return '<li>'+i+'</li>';}).join("")+'</ol></div>';
+}
+
+function remarketingView(){
+  var jump = ['greet','discover','branch','close'].map(function(id,i){
+    var labels=['1. Greeting','2. Discovery','3. Situation paths','4. Confirm & close'];
+    return '<a href="#'+id+'">'+labels[i]+'</a>';
+  }).join("");
+  return '<div class="card">' +
+    '<div class="stagejump">'+jump+'</div>' +
+    stage(1,"Greeting & relationship check",
+      pathStep("Greet & Confirm","Politely greet the customer, identify yourself and the company, and confirm you are speaking with the correct customer.") +
+      pathStep("Reconnect With Previous Purchase","Mention the customer's previous order and establish familiarity with their history.") +
+      pathStep("Explain the Purpose","Briefly explain that the call is to check on their experience and see if there is anything you can assist with.") +
+      pathStep("Invite the Conversation","Give the customer an opportunity to respond naturally before moving into discovery or recommendations.") +
+      '<div class="script">"Hello, good afternoon. May I speak with (CLIENT NAME)?"</div>' +
+      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME), Product Specialist from (COMPANY). We noticed that you previously ordered (PRODUCT NAME) from us, so I’m reaching out to check how you’re doing and how your experience has been so far."</div>' +
+      '<div class="script">"We regularly follow up with our customers to see how they’re doing and if there’s anything we can assist you with."</div>',
+      'greet') +
+    stage(2,"Customer engagement & discovery",
+      '<p>Reconnect with the customer and rebuild rapport first. Acknowledge their situation and ask how their experience has been so far. Understand whether they were able to use the product consistently, ask if they’ve already finished using it, and explore how they felt after using it — listen carefully to their needs, concerns, and current status.</p>' +
+      '<p>If the customer shows interest, need, or intent to repurchase, transition naturally into the recommendation or offer. If they’re still undecided, offer support and continue the conversation without hard selling, and respect their response to keep the relationship warm.</p>' +
+      '<p><strong>Before moving on:</strong> find out whether the client hasn’t started the product yet, has started but not finished, or has already finished the previous order — that determines which path below to take.</p>',
+      'discover') +
+    stage(3,"Situation paths",
+      '<div class="pathgrid">' +
+        '<div class="pathcard"><h4>Client Has Not Started</h4>' +
+          pathStep("Show Understanding","Acknowledge the client's situation and calmly ask why they have not started.") +
+          pathStep("Understand the Need","Ask about their current concern and identify the main issue they want to address.") +
+          pathStep("Address Before Recommending","Resolve or address the reason for not starting first. If appropriate, recommend an approved related product based on their stated need.") +
+          pathStep("If They Want to Wait","Offer a callback at the earliest reasonable time and tag <em>Call Later – Has Not Started</em>.") +
+          pathStep("If They Decline","Respect the decision and tag <em>Changed Mind</em>.") +
+          offerBox(["Offer the related product with a 40% discount."]) +
+        '</div>' +
+        '<div class="pathcard"><h4>Client Started Taking the Product but Has Not Finished</h4>' +
+          pathStep("Check the Client's Progress","Ask about the client's experience, consistency of use, remaining supply, and any improvements or concerns.") +
+          pathStep("Respond Based on the Client's Experience","If the client is improving, reinforce consistent use and the importance of completing the intended course. If there's no improvement or the client has concerns, understand the situation first and follow the approved guidance.") +
+          pathStep("If the Client Still Has Enough Product","Do not push an immediate refill. If appropriate, schedule <em>Call Later – Has Not Finished</em> closer to when the client is expected to complete their supply.") +
+          pathStep("If the Client Is Nearly Finished","If the client is satisfied with the product, naturally transition into a refill discussion or a relevant product recommendation.") +
+          pathStep("Use Previous Usage as a Guide","Use the client's previous purchase and actual usage to guide the recommendation. The suggested quantity is only a guide and is not mandatory — the final decision always belongs to the client.") +
+          pathStep("Explore Relevant Opportunities","If the client reports a negative experience, understand the reason first. Only recommend another product when it is relevant and approved. Ask whether a family member has a similar concern.") +
+          offerBox(["Previous 3 pcs → consider 2 pcs","Previous 2 pcs → consider 3 pcs","Previous 1 pc → consider 3 pcs","Previous 5+ pcs → reinforce consistent use or continuation when appropriate"]) +
+        '</div>' +
+        '<div class="pathcard"><h4>Client Not Improving</h4>' +
+          pathStep("Understand the Client's Experience","Ask about product usage, consistency, previous supply, expected results, changes in their original concern, progress made, and any concerns or unwanted reactions.") +
+          pathStep("Identify the Root Cause First","Avoid immediately recommending another quantity or product. First, determine why the client has not experienced the expected outcome.") +
+          pathStep("Follow Approved Product Guidance","Based on the client's situation and the approved guidance, proceed with the appropriate recommendation, suggest a relevant related product, or escalate the concern when necessary.") +
+          pathStep("Present the Appropriate Offer","When a recommendation is appropriate, present the offer using the current approved Offer Matrix, including the correct pricing and discounts.") +
+          pathStep("Handle Hesitation Naturally and Professionally","Acknowledge their experience and explore the reason for their hesitation. Respond to the specific concern clearly and without pressure.") +
+          pathStep("If the Client Declines","Respect the decision. If the reason is no money, offer a callback at the earliest reasonable date — no more than one callback attempt.") +
+          pathStep("If Another Product Is Needed","Gather the necessary details and present the appropriate approved cross-sell.") +
+          offerBox(["Offer 1: 3 pcs and 2 pcs, original price","Offer 2: 3 pcs and 2 pcs, with discount","Handle objection → offer another/related product, can be with discount right away"]) +
+        '</div>' +
+        '<div class="pathcard"><h4>Client Satisfied / Ready to Continue</h4>' +
+          pathStep("Reinforce the Positive Experience","Acknowledge the client's positive experience and confirm their interest in continuing.") +
+          pathStep("Recommend the Next Purchase","Use the client's previous purchase, actual usage, and current situation to guide the appropriate refill or continuation recommendation. Use only approved quantities and the current Offer Matrix for pricing and discounts.") +
+          pathStep("Handle Hesitation Naturally","Acknowledge their experience and ask what's making them unsure about continuing. Address the specific concern and reinforce the relevant value without applying pressure.") +
+          pathStep("If the Client Declines","Respect the client's decision. If the reason is no money, offer a callback only when appropriate — maximum one callback.") +
+          pathStep("Explore Relevant Opportunities","If the client has another relevant need, gather the necessary information and present an appropriate approved cross-sell.") +
+          offerBox(["Offer 1: 3 pcs, original price","Offer 2: 3 pcs with 40% discount","Offer 3: 2 pcs with 40% discount","Handle objection → offer another/related product, can be with discount right away"]) +
+        '</div>' +
+      '</div>',
+      'branch') +
+    stage(4,"Confirm details & close",
+      pathStep("Confirm All Order Details First","Before proceeding, clearly repeat all the order details to the client to make sure the information is accurate.") +
+      pathStep("Include Complete Order Information","Confirm: quantity ordered, product name, item price, delivery fee, total price, delivery address, delivery time to the client's area, email address, and client name.") +
+      pathStep("Ask for Confirmation","After repeating the details, ask the client to confirm.") +
+      pathStep("If the Information Is Correct","Proceed to clearly explain the delivery terms.") +
+      pathStep("If the Information Is Incorrect","Ask which part is incorrect, clarify the correct details, and confirm the updated information before proceeding.") +
+      '<div class="script">"So before we proceed with your order, let me clarify all the information first to make sure everything is correct."<br>"You bought (QUANTITY) bottle(s) of (PRODUCT NAME)."<br>"The price is (PRICE), the delivery fee is (DELIVERY FEE), so the total amount is (TOTAL PRICE)."<br>"It will be delivered to (CLIENT’S ADDRESS), and the estimated delivery time to your area is (DELIVERY TIME)."<br>"Your name is (CLIENT’S NAME), and your email address is (EMAIL)."<br>"Are all my informations correct?"</div>' +
+      '<p>If yes: <em>"Thank you for confirming. Let me now explain the delivery terms clearly."</em><br>If no: <em>"Thank you for letting me know. May I ask which part is incorrect so I can correct it?"</em></p>',
+      'close') +
+  '</div>';
+}
+
+function notOrderedView(){
+  var jump = ['no-greet','no-verify','no-reason','no-offer'].map(function(id,i){
+    var labels=['1. Reason for call','2. Verify & clarify','3. Identify the real reason','4. Sales opportunity'];
+    return '<a href="#'+id+'">'+labels[i]+'</a>';
+  }).join("");
+  return '<div class="card">' +
+    '<div class="stagejump">'+jump+'</div>' +
+    stage(1,"Greeting & reason for the call",
+      '<p>Reconnect and explain the reason for the call without assuming or accusing the customer of placing the order.</p>' +
+      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME) from (COMPANY). We’re reaching out about a recent request recorded under your name for (PRODUCT NAME). May I quickly confirm if you’re familiar with this?"</div>',
+      'no-greet') +
+    stage(2,"Acknowledge, then clarify",
+      '<p>If the customer says they didn’t order, don’t argue. Instead verify gently: does the product/date sound familiar, did they or a household member sign up or inquire online, and do they currently have a related concern?</p>',
+      'no-verify') +
+    stage(3,"Identify the real reason",
+      '<div class="pathgrid">' +
+        '<div class="pathcard"><h4>Changed mind</h4>Understand and address the concern if appropriate.</div>' +
+        '<div class="pathcard"><h4>No money</h4>Offer a callback — maximum one attempt.</div>' +
+        '<div class="pathcard"><h4>Not the decision-maker</h4>Identify the real decision-maker; if a need exists, create a referral order and attempt to close, or hand off to RT/Retention if unavailable.</div>' +
+        '<div class="pathcard"><h4>Genuine unrecognized order</h4>Respect the response and close professionally.</div>' +
+      '</div>',
+      'no-reason') +
+    stage(4,"Sales opportunity",
+      '<p>If the customer is the decision-maker and a real need exists, present <strong>5 pcs and 3 pcs</strong> together as the primary offer. If they push back on price or quantity, drop to <strong>2 pcs and 1 pc</strong>.</p>' +
+      '<p><strong>Offer ladder:</strong> 7/10 pcs (upsell) → 5/3 pcs (primary) → 2/1 pc (budget recovery). Never argue that the customer ordered — the goal is finding the real reason and any legitimate opportunity.</p>',
+      'no-offer') +
+  '</div>';
+}
+
+function renderApp(state){
+  var active = ACTIVE || "ranking";
+  var s = SECTIONS[active];
+  var viewHtml = {
+    ranking: rankingView, performance: performanceView, shifts: shiftsView,
+    remarketing: remarketingView, notordered: notOrderedView, gifts: giftsView,
+    redelivery: redeliveryView, callbacks: callbacksView
+  }[active]();
+
+  return '' +
+  '<div class="mobilebar"><button id="navtoggle" aria-label="Open menu">☰</button><strong>'+esc(SECTIONS[active].title)+'</strong></div>' +
+  '<div class="scrim" id="scrim"></div>' +
+  '<aside class="side" id="sidenav">' +
+    '<div class="brand"><div class="mark">☎️</div><div class="txt"><strong>Confirmation Desk</strong><span>Team ops hub</span></div></div>' +
+    '<nav>'+renderNav(active, SECTIONS)+'</nav>' +
+  '</aside>' +
+  '<main class="main">' +
+    '<div class="pagehead"><div class="eyebrow">'+esc(s.eyebrow)+'</div><h1>'+esc(s.title)+'</h1><p>'+esc(s.desc)+'</p></div>' +
+    '<section class="view" data-active="true">'+viewHtml+'</section>' +
+  '</main>';
+}
+
+function setActive(id){
+  ACTIVE = id;
+  document.getElementById('app').innerHTML = renderApp(STATE);
+  attachHandlers();
+  document.getElementById('app').scrollIntoView({block:'start'});
+}
+
+function attachHandlers(){
+  var btns = document.querySelectorAll('[data-nav]');
+  for (var i=0;i<btns.length;i++){
+    btns[i].addEventListener('click', function(e){ setActive(e.currentTarget.getAttribute('data-nav')); });
+  }
+  var toggle = document.getElementById('navtoggle');
+  var side = document.getElementById('sidenav');
+  var scrim = document.getElementById('scrim');
+  if (toggle){
+    toggle.addEventListener('click', function(){ side.classList.add('open'); scrim.classList.add('show'); });
+    scrim.addEventListener('click', function(){ side.classList.remove('open'); scrim.classList.remove('show'); });
+  }
+  var form = document.getElementById('offform');
+  if (form){
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      var name = document.getElementById('f-name').value.trim();
+      if (!name) return;
+      var entry = {
+        name: name,
+        off1: document.getElementById('f-off1').value,
+        off2: document.getElementById('f-off2').value,
+        shift: document.getElementById('f-shift').value,
+        reason: document.getElementById('f-reason').value.trim(),
+        added: true
+      };
+      STATE.offRequests.push(entry);
+      var submitBtn = document.getElementById('f-submit');
+      var msg = document.getElementById('f-msg');
+      submitBtn.disabled = true;
+      msg.textContent = 'Adding…';
+      msg.className = 'savemsg';
+      setTimeout(function(){
+        setActive('shifts');
+        var m = document.getElementById('f-msg');
+        if (m){ m.textContent = 'Added to this list on your device. Note: this file isn’t connected to a shared server, so this addition stays local to your browser — send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
+      }, 200);
+    });
+  }
+}
+
+function boot(){
+  document.getElementById('app').innerHTML = renderApp(STATE);
+  attachHandlers();
+}
+if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
+</script>
+
+</body></html>
