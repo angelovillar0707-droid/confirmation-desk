@@ -404,6 +404,31 @@ async function buildGifts() {
   return `var GIFTS = [\n${body}\n];`;
 }
 
+// ---------- Pricing tiers (also inside the "Free Gift and Pricing" tab, next to the gift list) ----------
+async function buildPricing() {
+  const sheetLabel = "Free Gift and Pricing (pricing tiers)";
+  const { rows, headerRowIdx } = await getValidatedSheetByGid(
+    GID_GIFTS, ["Pricing", "Original Price", "Discounted Price", "Shipping Fee"], sheetLabel
+  );
+  const header = rows[headerRowIdx];
+  const tierCol = requireCol(header, "Pricing", { mode: "contains" }, sheetLabel);
+  const origCol = requireCol(header, "Original Price", { mode: "contains" }, sheetLabel);
+  const discCol = requireCol(header, "Discounted Price", { mode: "contains" }, sheetLabel);
+  const shipCol = requireCol(header, "Shipping Fee", { mode: "contains" }, sheetLabel);
+
+  const entries = [];
+  for (let i = headerRowIdx + 1; i < rows.length; i++) {
+    const r = rows[i];
+    const tier = esc(r[tierCol]);
+    if (!tier) break; // contiguous tier list ends at the first blank cell
+    entries.push([tier, esc(r[origCol]), esc(r[discCol]), esc(r[shipCol])]);
+  }
+  if (entries.length < 1) throw new Error(`${sheetLabel}: no pricing rows parsed  -  refusing to publish.`);
+
+  const body = entries.map(e => `  [${e.map(jstr).join(",")}]`).join(",\n");
+  return `var PRICING = [\n${body}\n];`;
+}
+
 function replaceBlock(html, markerName, newLiteral) {
   const start = `/*AUTO-${markerName}-START*/`;
   const end = `/*AUTO-${markerName}-END*/`;
@@ -434,6 +459,7 @@ async function main() {
     { name: "Ranking", run: () => buildRanking() },
     { name: "Performance", run: () => buildPerf(existingAugustLiteral) },
     { name: "Free Gift table", run: () => buildGifts() },
+    { name: "Pricing tiers", run: () => buildPricing() },
     { name: "Day-off requests", run: () => buildDayOffRequests() },
   ];
   const results = await Promise.allSettled(jobs.map(j => j.run()));
@@ -449,11 +475,12 @@ async function main() {
     throw new Error(`${failures.length} of ${jobs.length} block(s) failed to refresh:\n${summary}`);
   }
 
-  const [rankingLiteral, perfLiteral, giftsLiteral, dayOffLiteral] = results.map(r => r.value);
+  const [rankingLiteral, perfLiteral, giftsLiteral, pricingLiteral, dayOffLiteral] = results.map(r => r.value);
 
   html = replaceBlock(html, "RANKING", rankingLiteral);
   html = replaceBlock(html, "PERF", perfLiteral);
   html = replaceBlock(html, "GIFTS", giftsLiteral);
+  html = replaceBlock(html, "PRICING", pricingLiteral);
   html = replaceBlock(html, "DAYOFF", dayOffLiteral);
 
   writeFileSync(FILE, html, "utf8");
