@@ -145,6 +145,10 @@
 
 <script id="page-script">
 var ACTIVE = "ranking";
+/* Paste your deployed Google Apps Script Web App URL below (ends in /exec) to make
+   the "Add a referral" form save straight to the Manual Callback sheet tab.
+   Leave it blank to keep the form working locally only (not saved to the sheet). */
+var REFERRAL_INTAKE_URL = "";
 /*AUTO-DAYOFF-START*/
 var DAYOFF_STATE = {"dayOffRequests":[{"name":"Raysan Garganta","off1":"Monday","off2":"Tuesday","shift":"Morning","reason":"","added":false},{"name":"Marianne Visda","off1":"Tuesday","off2":"Wednesday","shift":"Morning","reason":"","added":false},{"name":"Karen Dilig","off1":"Wednesday","off2":"Sunday","shift":"Afternoon","reason":"Officer duty / church","added":false},{"name":"Joyce Malapitan","off1":"Wednesday","off2":"Sunday","shift":"Morning","reason":"Weekly visit to parents in Bulacan","added":false},{"name":"Bhea Cuenca","off1":"Wednesday","off2":"Thursday","shift":"Morning","reason":"Check-up and vaccination date for my child","added":false}]};
 /*AUTO-DAYOFF-END*/
@@ -464,6 +468,10 @@ function callbacksView(){
         '<div><label for="rf-contact">Number</label><input id="rf-contact" maxlength="20" placeholder="e.g. 9502667914"></div>' +
         '<div><label for="rf-relation">Relationship</label><input id="rf-relation" maxlength="40" placeholder="e.g. Spouse, Sibling"></div>' +
         '<div><label for="rf-product">Product</label><input id="rf-product" maxlength="60" placeholder="e.g. Glucofortis"></div>' +
+      '</div>' +
+      '<div class="formrow">' +
+        '<div><label for="rf-hash">Previous order hash / ID</label><input id="rf-hash" maxlength="60" placeholder="e.g. ogvzOLRDXo0EqYW"></div>' +
+        '<div><label for="rf-address">Address</label><input id="rf-address" maxlength="120" placeholder="e.g. Bacolod City"></div>' +
       '</div>' +
       '<button type="submit" class="btn" id="rf-submit">Add referral</button>' +
       '<div class="savemsg" id="rf-msg"></div>' +
@@ -817,10 +825,11 @@ function attachHandlers(){
       if (!agent || !prevClient || !name) return;
       var entry = {
         agent: agent,
-        prevHash: '',
+        prevHash: document.getElementById('rf-hash').value.trim(),
         prevClient: prevClient,
         name: name,
         contact: document.getElementById('rf-contact').value.trim() || '\u2014',
+        address: document.getElementById('rf-address').value.trim(),
         relation: document.getElementById('rf-relation').value.trim(),
         product: document.getElementById('rf-product').value.trim(),
         added: true
@@ -831,11 +840,28 @@ function attachHandlers(){
       submitBtn.disabled = true;
       msg.textContent = 'Adding\u2026';
       msg.className = 'savemsg';
-      setTimeout(function(){
+
+      var localOnlyMsg = 'Added to this list on your device. Note: this file isn\u2019t connected to a shared server, so this addition stays local to your browser \u2014 send a copy of what you typed to your supervisor to get it added for everyone.';
+      var savedMsg = 'Added \u2014 and saved to the shared Manual Callback sheet.';
+      var failedMsg = 'Added to this list on your device, but saving to the shared sheet failed \u2014 please also send a copy of what you typed to your supervisor.';
+
+      function finish(text){
         setActive('callbacks');
         var m = document.getElementById('rf-msg');
-        if (m){ m.textContent = 'Added to this list on your device. Note: this file isn\u2019t connected to a shared server, so this addition stays local to your browser \u2014 send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
-      }, 200);
+        if (m){ m.textContent = text; m.className = 'savemsg'; }
+      }
+
+      if (REFERRAL_INTAKE_URL) {
+        fetch(REFERRAL_INTAKE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+          body: JSON.stringify(entry)
+        }).then(function(res){ return res.json ? res.json() : {}; })
+          .then(function(resp){ finish(resp && resp.status === 'ok' ? savedMsg : failedMsg); })
+          .catch(function(){ finish(failedMsg); });
+      } else {
+        setTimeout(function(){ finish(localOnlyMsg); }, 200);
+      }
     });
   }
 }
