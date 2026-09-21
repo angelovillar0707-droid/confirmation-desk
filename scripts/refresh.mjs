@@ -204,15 +204,21 @@ async function buildRanking() {
   const totalCol = requireCol(header, "TOTAL SCORE", {}, sheetLabel);
   const rankCol = requireCol(header, "Ranking", {}, sheetLabel);
 
+  // The ranking table is one contiguous block right under its header —
+  // a blank agent cell, or the sheet's own "Total" row, marks the end of
+  // it. Stop there (don't just skip past it) so unrelated data further
+  // down the same tab — a different table that happens to reuse these
+  // same columns — never gets vacuumed up into the ranking list.
   const entries = [];
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const agent = esc(r[agentCol]);
-    if (!agent) continue;
+    if (!agent) break;
+    if (norm(agent).includes("total")) break;
     const score = Number(esc(r[scoreCol]).replace(/[^0-9.\-]/g, ""));
     const total = Number(esc(r[totalCol]).replace(/[^0-9.\-]/g, ""));
     const rank = Number(esc(r[rankCol]).replace(/[^0-9.\-]/g, ""));
-    if (!Number.isFinite(score) || !Number.isFinite(total) || !Number.isFinite(rank)) continue;
+    if (!Number.isFinite(score) || !Number.isFinite(total) || !Number.isFinite(rank)) break;
     entries.push({ agent, score, conv: esc(r[convCol]), total, rank });
   }
   if (entries.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid rows parsed — refusing to publish.`);
@@ -288,11 +294,15 @@ async function buildDayOffRequests() {
   const shiftCol = off1Col + 2;
   const reasonCol = off1Col + 3;
 
+  // Same reasoning as the ranking table: stop at the first blank name cell
+  // rather than skipping past it, so this doesn't wander into unrelated
+  // data further down the same tab that happens to have something in this
+  // column.
   const offRequests = [];
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const name = esc(r[nameCol]);
-    if (!name) continue;
+    if (!name) break;
     offRequests.push({
       name,
       off1: esc(r[off1Col]),
