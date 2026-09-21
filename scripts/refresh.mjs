@@ -52,7 +52,10 @@ function parseCsv(text) {
   return rows;
 }
 
-function norm(s) { return String(s == null ? "" : s).trim().toLowerCase(); }
+// Collapses ALL whitespace runs (including the line breaks Sheets inserts
+// into wrapped header cells, e.g. "AGENT \nNAME") down to single spaces
+// before comparing, so a wrapped header cell still matches its plain label.
+function norm(s) { return String(s == null ? "" : s).replace(/\s+/g, " ").trim().toLowerCase(); }
 
 function previewRow(row, n = 15) {
   if (!row || !row.length) return "(empty row)";
