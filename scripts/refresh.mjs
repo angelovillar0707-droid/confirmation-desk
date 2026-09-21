@@ -177,7 +177,19 @@ async function getValidatedSheetByGid(gid, requiredLabels, sheetLabel, attempts 
 }
 
 function esc(s) { return String(s == null ? "" : s).trim(); }
-function jstr(s) { return JSON.stringify(esc(s)); }
+
+// JSON.stringify keeps non-ASCII characters (₱, curly quotes, an agent's
+// accented name, etc.) as literal UTF-8 bytes in the output. That's fine for
+// this script's own commit — Node writes the file as UTF-8 and git preserves
+// it exactly — but index.html also gets hand-pasted into GitHub's web editor
+// from time to time, and that copy/paste path has, in practice, mangled
+// multi-byte characters into mojibake. \u-escaping every non-ASCII character
+// here keeps the generated source pure ASCII, so it survives a copy/paste
+// unchanged no matter what happens on the clipboard.
+function jsEscapeNonAscii(s) {
+  return s.replace(/[\u0080-￿]/g, c => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
+}
+function jstr(s) { return jsEscapeNonAscii(JSON.stringify(esc(s))); }
 
 // ---------- Ranking / Score ----------
 async function buildRanking() {
