@@ -146,7 +146,7 @@
 <script id="page-script">
 var ACTIVE = "ranking";
 /*AUTO-DAYOFF-START*/
-var DAYOFF_STATE = {"dayOffRequests":[]};
+var DAYOFF_STATE = {"dayOffRequests":[{"name":"Raysan Garganta","off1":"Monday","off2":"Tuesday","shift":"Morning","reason":"","added":false},{"name":"Marianne Visda","off1":"Tuesday","off2":"Wednesday","shift":"Morning","reason":"","added":false},{"name":"Karen Dilig","off1":"Wednesday","off2":"Sunday","shift":"Afternoon","reason":"Officer duty / church","added":false},{"name":"Joyce Malapitan","off1":"Wednesday","off2":"Sunday","shift":"Morning","reason":"Weekly visit to parents in Bulacan","added":false},{"name":"Bhea Cuenca","off1":"Wednesday","off2":"Thursday","shift":"Morning","reason":"Check-up and vaccination date for my child","added":false}]};
 /*AUTO-DAYOFF-END*/
 var LEAVE_STATE = {"leaveRequests":[{"name":"Angelo","start":"Oct 1","end":"Oct 10","reason":"Birthday ng langgam ko","added":false},{"name":"Lanlie","start":"Oct 1","end":"Oct 3","reason":"Father's bday and school program","added":false},{"name":"Joyce","start":"","end":"","reason":"Uuwi po ng province for personal matters","added":false},{"name":"Carmina","start":"","end":"","reason":"Family reunion sa province","added":false},{"name":"Jasmin","start":"Oct 5","end":"Oct 7","reason":"Family gathering","added":false}]};
 
@@ -163,90 +163,70 @@ var LATE_LOG = [
 
 /*AUTO-RANKING-START*/
 var RANKING = [
-  {agent:"Filipina Bonifacio",score:20,conv:"12.90%",total:54.9,rank:8},
-  {agent:"Merly Palomares",score:30,conv:"15.71%",total:74.9,rank:4},
-  {agent:"Mary Fontanilla",score:35,conv:"24.48%",total:100,rank:1},
-  {agent:"Dhanica Dadoya",score:26,conv:"18.57%",total:75.1,rank:3},
-  {agent:"Jubel Siagan",score:14,conv:"24.14%",total:69.3,rank:5},
-  {agent:"Sharon SanJuan",score:32,conv:"19.05%",total:84.6,rank:2},
-  {agent:"Joyce Malapitan",score:19,conv:"16.81%",total:61.5,rank:7},
-  {agent:"Marianne Visda",score:10,conv:"12.50%",total:39.8,rank:10},
-  {agent:"Lanlie Mayor",score:11,conv:"8.46%",total:33,rank:14},
-  {agent:"Christian Tad-y",score:10,conv:"10.10%",total:34.9,rank:13},
-  {agent:"Reynalyn Roco",score:14,conv:"20.59%",total:62.1,rank:6},
-  {agent:"Carmina Fernandez",score:8,conv:"7.55%",total:26.8,rank:18},
-  {agent:"John Jamero",score:9,conv:"11.39%",total:36.1,rank:11},
-  {agent:"Raysan Garganta",score:8,conv:"10.13%",total:32.1,rank:15},
-  {agent:"Jasmin Aruta",score:16,conv:"10.32%",total:43.9,rank:9},
-  {agent:"Trina Idaloy",score:7,conv:"7.45%",total:25.2,rank:19},
-  {agent:"Bhea Cuenca",score:9,conv:"11.25%",total:35.8,rank:12},
-  {agent:"Jonaliza Guevarra",score:7,conv:"10.61%",total:31.7,rank:16},
-  {agent:"Karen Dilig",score:9,conv:"7.56%",total:28.3,rank:17}
+  {agent:"Joyce Malapitan",score:24,conv:"16.44%",total:92.9,rank:1},
+  {agent:"Mary Fontanilla",score:28,conv:"10.37%",total:81.5,rank:2},
+  {agent:"Merly Palomares",score:24,conv:"12.57%",total:81.1,rank:3},
+  {agent:"Dhanica Dadoya",score:26,conv:"11.40%",total:81.1,rank:3},
+  {agent:"Jubel Siagan",score:14,conv:"14.43%",total:68.9,rank:5},
+  {agent:"Sharon SanJuan",score:19,conv:"11.11%",total:67.7,rank:6},
+  {agent:"Jonaliza Guevarra",score:18,conv:"10.59%",total:64.4,rank:7},
+  {agent:"Reynalyn Roco",score:15,conv:"10.42%",total:58.5,rank:8},
+  {agent:"Christian Tad-y",score:16,conv:"8.12%",total:53.3,rank:9},
+  {agent:"Filipina Bonifacio",score:15,conv:"8.06%",total:51.3,rank:10},
+  {agent:"Marianne Visda",score:13,conv:"6.84%",total:44,rank:11},
+  {agent:"Raysan Garganta",score:12,conv:"6.98%",total:42.7,rank:12},
+  {agent:"Trina Idaloy",score:11,conv:"5.14%",total:35.3,rank:13},
+  {agent:"Karen Dilig",score:9,conv:"4.05%",total:28.4,rank:14},
+  {agent:"Carmina Fernandez",score:7,conv:"4.90%",total:27.4,rank:15},
+  {agent:"Jasmin Aruta",score:7,conv:"3.93%",total:24.5,rank:16},
+  {agent:"John Jamero",score:5,conv:"3.79%",total:20.5,rank:17},
+  {agent:"Bhea Cuenca",score:4,conv:"2.80%",total:15.7,rank:18},
+  {agent:"Lanlie Mayor",score:4,conv:"2.70%",total:15.4,rank:19}
 ].sort(function(a,b){return a.rank-b.rank;});
 /*AUTO-RANKING-END*/
 
 /*AUTO-PERF-START*/
 var PERF = {
   rows:[
-    {a:"Jubel Siagan",cur:44,prev:31,diff:"+13",pct:"42%",avg:"\u20b13,114.43",calls:"191",conv:"23%"},
-    {a:"Filipina Bonifacio",cur:40,prev:55,diff:"-15",pct:"-27%",avg:"\u20b12,802.93",calls:"364",conv:"11%"},
-    {a:"Sharon SanJuan",cur:65,prev:40,diff:"+25",pct:"63%",avg:"\u20b12,773.11",calls:"414",conv:"16%"},
-    {a:"Christian Tad-y",cur:30,prev:24,diff:"+6",pct:"25%",avg:"\u20b12,696.93",calls:"361",conv:"8%"},
-    {a:"Merly Palomares",cur:69,prev:66,diff:"+3",pct:"5%",avg:"\u20b13,022.67",calls:"449",conv:"15%"},
-    {a:"Marianne Visda",cur:38,prev:35,diff:"+3",pct:"9%",avg:"\u20b12,766.71",calls:"311",conv:"12%"},
-    {a:"Joyce Malapitan",cur:59,prev:35,diff:"+24",pct:"69%",avg:"\u20b12,495.47",calls:"287",conv:"21%"},
-    {a:"Lanlie Mayor",cur:22,prev:29,diff:"-7",pct:"-24%",avg:"\u20b12,372.86",calls:"349",conv:"6%"},
-    {a:"Carmina Fernandez",cur:20,prev:23,diff:"-3",pct:"-13%",avg:"\u20b12,720.85",calls:"317",conv:"6%"},
-    {a:"Raysan Garganta",cur:28,prev:18,diff:"+10",pct:"56%",avg:"\u20b12,711.43",calls:"299",conv:"9%"},
-    {a:"Trina Idaloy",cur:22,prev:19,diff:"+3",pct:"16%",avg:"\u20b12,668.09",calls:"268",conv:"8%"},
-    {a:"Mary Fontanilla",cur:89,prev:91,diff:"-2",pct:"-2%",avg:"\u20b12,631.16",calls:"488",conv:"18%"},
-    {a:"John Jamero",cur:16,prev:18,diff:"-2",pct:"-11%",avg:"\u20b12,899.94",calls:"203",conv:"8%"},
-    {a:"Reynalyn Roco",cur:40,prev:30,diff:"+10",pct:"33%",avg:"\u20b13,046.93",calls:"181",conv:"22%"},
-    {a:"Dhanica Dadoya",cur:79,prev:52,diff:"+27",pct:"52%",avg:"\u20b12,340.47",calls:"526",conv:"15%"},
-    {a:"Jasmin Aruta",cur:36,prev:28,diff:"+8",pct:"29%",avg:"\u20b12,737.61",calls:"327",conv:"11%"},
-    {a:"Karen Dilig",cur:36,prev:0,diff:"+36",pct:"3600%",avg:"\u20b12,948.44",calls:"429",conv:"8%"},
-    {a:"Jonaliza Guevarra",cur:38,prev:0,diff:"+38",pct:"3800%",avg:"\u20b13,041.11",calls:"306",conv:"12%"},
-    {a:"Bhea Cuenca",cur:16,prev:0,diff:"+16",pct:"1600%",avg:"\u20b12,752.25",calls:"209",conv:"8%"}
+    {a:"Mary Fontanilla",cur:71,prev:58,diff:"+13",pct:"22%",avg:"\u20B12,533.96",calls:447,conv:"16%"},
+    {a:"Merly Palomares",cur:48,prev:39,diff:"+9",pct:"23%",avg:"\u20B12,926.33",calls:330,conv:"15%"},
+    {a:"Sharon SanJuan",cur:44,prev:26,diff:"+18",pct:"69%",avg:"\u20B12,942.02",calls:323,conv:"14%"},
+    {a:"Dhanica Dadoya",cur:50,prev:35,diff:"+15",pct:"43%",avg:"\u20B12,376.84",calls:385,conv:"13%"},
+    {a:"Jonaliza Guevarra",cur:29,prev:0,diff:"+29",pct:"2900%",avg:"\u20B12,682.76",calls:244,conv:"12%"},
+    {a:"Reynalyn Roco",cur:26,prev:19,diff:"+7",pct:"37%",avg:"\u20B12,877.54",calls:136,conv:"19%"},
+    {a:"Christian Tad-y",cur:26,prev:21,diff:"+5",pct:"24%",avg:"\u20B12,582.23",calls:328,conv:"8%"},
+    {a:"Jubel Siagan",cur:39,prev:24,diff:"+15",pct:"63%",avg:"\u20B12,975.62",calls:184,conv:"21%"},
+    {a:"Joyce Malapitan",cur:39,prev:31,diff:"+8",pct:"26%",avg:"\u20B12,413.15",calls:204,conv:"19%"},
+    {a:"Jasmin Aruta",cur:26,prev:14,diff:"+12",pct:"86%",avg:"\u20B12,578.27",calls:263,conv:"10%"},
+    {a:"Karen Dilig",cur:31,prev:0,diff:"+31",pct:"3100%",avg:"\u20B12,837.29",calls:330,conv:"9%"},
+    {a:"Marianne Visda",cur:31,prev:29,diff:"+2",pct:"7%",avg:"\u20B12,528.39",calls:294,conv:"11%"},
+    {a:"Filipina Bonifacio",cur:30,prev:35,diff:"-5",pct:"-14%",avg:"\u20B12,758.97",calls:316,conv:"9%"},
+    {a:"Trina Idaloy",cur:16,prev:11,diff:"+5",pct:"45%",avg:"\u20B12,513.56",calls:240,conv:"7%"},
+    {a:"Raysan Garganta",cur:25,prev:11,diff:"+14",pct:"127%",avg:"\u20B12,638.64",calls:273,conv:"9%"},
+    {a:"Bhea Cuenca",cur:10,prev:0,diff:"+10",pct:"1000%",avg:"\u20B12,500.00",calls:140,conv:"7%"},
+    {a:"John Jamero",cur:8,prev:10,diff:"-2",pct:"-20%",avg:"\u20B12,586.50",calls:143,conv:"6%"},
+    {a:"Carmina Fernandez",cur:12,prev:16,diff:"-4",pct:"-25%",avg:"\u20B12,675.50",calls:234,conv:"5%"},
+    {a:"Lanlie Mayor",cur:12,prev:25,diff:"-13",pct:"-52%",avg:"\u20B12,514.75",calls:248,conv:"5%"}
   ],
-  total:{cur:787,prev:594,diff:"+193",pct:"32%",avg:"\u20b12,749.84",calls:"6,279",conv:"13%"},
-  pace:{above:0,below:0},
+  total:{cur:573,prev:404,diff:"+169",pct:"42%",avg:"\u20B12,781.64",calls:"5,062",conv:"11%"},
+  pace:{above:11,below:5},
   august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"\u20B12,514.73",avgPrev:"\u20B12,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
 };
 /*AUTO-PERF-END*/
 
 /*AUTO-GIFTS-START*/
 var GIFTS = [
-  ["Arti-flex","Easy Go","Easy Go"],
-  ["Optiheal","Easy Go","Easy Go"],
-  ["Footurel","Easy Go","Easy Go"],
-  ["Variflex","Easy Go","Easy Go"],
-  ["D-Up","Prostaman","Prostaman"],
-  ["Vitaman Plus","Prostaman","Prostaman"],
-  ["Prostaman","Easy Go","Easy Go"],
-  ["Neo Card Potency","Prostaman","Prostaman"],
-  ["TensoLumen","Easy Go","Variflex"],
-  ["Neocardia","Easy Go","Variflex"],
-  ["Glucofortis","Footurel Gel","Variflex"],
-  ["Ketonica","Variflex","Retinlift"],
-  ["Wellatox","Variflex","Retinlift"],
-  ["Rootera","Variflex","Retinlift"],
-  ["Retinlift","Footurel Gel","Variflex"],
-  ["Easy Go","Easy Go","Easy Go"]
+  ["Easy Go Max","Easy Go","Easy Go"],["Arti-flex","Easy Go","Easy Go"],["Optiheal","Easy Go","Easy Go"],
+  ["Footurel","Easy Go","Easy Go"],["Variflex","Easy Go","Easy Go"],["D-Up","Prostaman","Prostaman"],
+  ["Vitaman Plus","Prostaman","Prostaman"],["Prostaman","Easy Go","Easy Go"],["Neo Card Potency","Prostaman","Prostaman"],
+  ["TensoLumen","Easy Go","Variflex"],["Neocardia","Easy Go","Variflex"],["Glucofortis","Footurel Gel","Variflex"],
+  ["Ketonica","Variflex","Retinlift"],["Wellatox","Variflex","Retinlift"],["Rootera","Variflex","Retinlift"],
+  ["Retinlift","Footurel Gel","Variflex"],["Easy Go","Easy Go","Easy Go"]
 ];
 /*AUTO-GIFTS-END*/
 
 /*AUTO-PRICING-START*/
-var PRICING = [
-  ["Main Product","1","1990","1,035","299"],
-  ["Main Product","5","2,745","1,650",""],
-  ["Main Product","3","2,187","1,320",""],
-  ["Main Product","2","1,640","990",""],
-  ["Main Product","1","990","590",""],
-  ["Main Product","5","2,275","1,500",""],
-  ["Main Product","3","1,515","999",""],
-  ["Main Product","2","1,140","830",""],
-  ["Main Product","1","690","419",""]
-];
+var PRICING = [];
 /*AUTO-PRICING-END*/
 
 var REDELIVERY = {
@@ -575,31 +555,78 @@ function remarketingView(){
 }
 
 function notOrderedView(){
-  var jump = ['no-greet','no-verify','no-reason','no-offer'].map(function(id,i){
-    var labels=['1. Reason for call','2. Verify & clarify','3. Identify the real reason','4. Sales opportunity'];
+  var jump = ['no-greet','no-ack','no-clarify','no-identify','no-handle','no-sales','no-disposition','no-close'].map(function(id,i){
+    var labels=['1. Greeting','2. Acknowledge','3. Clarify & discover','4. Identify the real reason','5. Handle the reason','6. Sales opportunity','7. Final disposition','8. Summing up'];
     return '<a href="#'+id+'">'+labels[i]+'</a>';
   }).join("");
   return '<div class="card">' +
     '<div class="stagejump">'+jump+'</div>' +
     stage(1,"Greeting & reason for the call",
-      '<p>Reconnect and explain the reason for the call without assuming or accusing the customer of placing the order.</p>' +
-      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME) from (COMPANY). We\u2019re reaching out about a recent request recorded under your name for (PRODUCT NAME). May I quickly confirm if you\u2019re familiar with this?"</div>',
+      '<p>Reconnect with the customer, identify the order, and explain the reason for the call without immediately assuming or accusing the customer of placing the order.</p>' +
+      '<div class="script">"Hello, good afternoon. May I speak with (CLIENT NAME)?"</div>' +
+      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME), Product Specialist from (COMPANY). We\u2019re reaching out regarding a recent request/order recorded under your name for (PRODUCT NAME). I\u2019d just like to clarify a few details with you to make sure everything is correct."</div>' +
+      '<div class="script">"May I quickly confirm if you\u2019re familiar with this request?"</div>',
       'no-greet') +
-    stage(2,"Acknowledge, then clarify",
-      '<p>If the customer says they didn\u2019t order, don\u2019t argue. Instead verify gently: does the product/date sound familiar, did they or a household member sign up or inquire online, and do they currently have a related concern?</p>',
-      'no-verify') +
-    stage(3,"Identify the real reason",
+    stage(2,"Acknowledge",
+      '<p>If the customer says "I didn\u2019t order" or "I don\u2019t know about this order," do not argue or challenge the customer.</p>',
+      'no-ack') +
+    stage(3,"Clarify & discover",
+      '<p>Naturally verify and explore: the customer name and product, the approximate order date, whether they or someone in their household may have placed the order, whether they previously signed up, inquired, or submitted information online about a related product, and if not, whether they currently experience a relevant concern.</p>' +
+      '<div class="script">"No problem. Let me just clarify a few things with you. The request we have is for (PRODUCT), under your name, around (DATE). Does that sound familiar?"</div>' +
+      '<div class="script">If no: "That\u2019s alright. Do you remember signing up or leaving your information online about any product related to (GENERAL CONCERN)?"</div>' +
+      '<div class="script">If still no: "I understand. May I ask, do you currently experience any concerns related to (GENERAL CONCERN)?"</div>',
+      'no-clarify') +
+    stage(4,"Identify the real reason",
+      '<p>Determine what is actually happening:</p>' +
       '<div class="pathgrid">' +
-        '<div class="pathcard"><h4>Changed mind</h4>Understand and address the concern if appropriate.</div>' +
-        '<div class="pathcard"><h4>No money</h4>Offer a callback \u2014 maximum one attempt.</div>' +
-        '<div class="pathcard"><h4>Not the decision-maker</h4>Identify the real decision-maker; if a need exists, create a referral order and attempt to close, or hand off to RT/Retention if unavailable.</div>' +
-        '<div class="pathcard"><h4>Genuine unrecognized order</h4>Respect the response and close professionally.</div>' +
-      '</div>',
-      'no-reason') +
-    stage(4,"Sales opportunity",
-      '<p>If the customer is the decision-maker and a real need exists, present <strong>5 pcs and 3 pcs</strong> together as the primary offer. If they push back on price or quantity, drop to <strong>2 pcs and 1 pc</strong>.</p>' +
-      '<p><strong>Offer ladder:</strong> 7/10 pcs (upsell) \u2192 5/3 pcs (primary) \u2192 2/1 pc (budget recovery). Never argue that the customer ordered \u2014 the goal is finding the real reason and any legitimate opportunity.</p>',
-      'no-offer') +
+        '<div class="pathcard"><h4>Changed Mind</h4></div>' +
+        '<div class="pathcard"><h4>No Money</h4></div>' +
+        '<div class="pathcard"><h4>Forgot Previous Inquiry</h4></div>' +
+        '<div class="pathcard"><h4>Interested but Not Ready</h4></div>' +
+        '<div class="pathcard"><h4>Family Member / Not the Decision-Maker</h4></div>' +
+        '<div class="pathcard"><h4>Genuine Unrecognized Order</h4></div>' +
+        '</div>' +
+      '<p><strong>Decision-maker check:</strong> if the customer IS the decision-maker, continue with the appropriate recovery/sales flow. If the customer is NOT the decision-maker, follow the Referral Opportunity process.</p>',
+      'no-identify') +
+    stage(5,"Handle the reason",
+      '<div class="tablewrap"><table class="grid"><thead><tr><th>Reason</th><th>Action</th></tr></thead><tbody>' +
+        '<tr><td>Changed Mind</td><td class="wrap">Understand the reason and address the concern when appropriate.</td></tr>' +
+        '<tr><td>No Money</td><td class="wrap">If appropriate, offer a callback \u2014 maximum 1 callback.</td></tr>' +
+        '<tr><td>Previous Interest</td><td class="wrap">Reconnect with the previous interest and present an appropriate offer.</td></tr>' +
+        '<tr><td>Interested but Not Ready</td><td class="wrap">Understand the reason and offer the appropriate next step.</td></tr>' +
+        '<tr><td>Not the Decision-Maker</td><td class="wrap">Identify the appropriate decision-maker and, when a relevant need exists, create a Referral Order and attempt to close it.</td></tr>' +
+        '<tr><td>Genuine Unknown</td><td class="wrap">Respect the response and close the conversation professionally.</td></tr>' +
+        '</tbody></table></div>' +
+      pathStep("Referral opportunity \u2014 only when applicable","If the customer is not the decision-maker: identify the decision-maker, create a referral order, then attempt to close. If the decision-maker is unavailable: create the referral order and hand off to RT/Retention follow-up."),
+      'no-handle') +
+    stage(6,"Sales opportunity",
+      '<p>If the customer IS the decision-maker and a legitimate need or interest is identified:</p>' +
+      pathStep("Primary Offer","Present <strong>5 pcs and 3 pcs</strong> simultaneously, allowing the customer to choose based on their needs and budget.") +
+      pathStep("Handle Objection","Softly handle the client\u2019s objection and help them see what the product offers \u2014 lifetime value and a healthier lifestyle.") +
+      pathStep("If declined on price or quantity","Present <strong>2 pcs and 1 pc</strong> as lower-commitment options.") +
+      pathStep("If still interested but declines","Identify the specific objection and handle it before making another offer.") +
+      pathStep("Pricing","Use only the current approved Offer Matrix and discount rules.") +
+      offerBox(["7 / 10 pcs \u2192 Upsell for strong/high-volume customers","5 / 3 pcs \u2192 Primary Offer","2 / 1 pc \u2192 Budget Recovery"]) +
+      '<p>If the customer is NOT the decision-maker, do not treat the contacted customer as the buyer \u2014 follow the Referral Order process instead.</p>',
+      'no-sales') +
+    stage(7,"Final disposition",
+      '<div class="pathgrid">' +
+        '<div class="pathcard"><h4>Successful Sale</h4></div>' +
+        '<div class="pathcard"><h4>Referral Order \u2013 Closed</h4></div>' +
+        '<div class="pathcard"><h4>Referral Order \u2013 RT/Retention Follow-Up</h4></div>' +
+        '<div class="pathcard"><h4>Call Later</h4></div>' +
+        '<div class="pathcard"><h4>No Money</h4></div>' +
+        '<div class="pathcard"><h4>Changed Mind</h4></div>' +
+        '<div class="pathcard"><h4>Genuine Unrecognized</h4></div>' +
+        '<div class="pathcard"><h4>Other</h4></div>' +
+        '</div>' +
+      '<p><strong>Core principle:</strong> do not try to prove that the customer ordered. Identify the real reason and determine whether a legitimate sales opportunity exists.</p>',
+      'no-disposition') +
+    stage(8,"Summing up",
+      '<p>Repeat all information to the client first to make sure everything you got is correct, including the delivery time to the client\u2019s area.</p>' +
+      '<div class="script">"So before we proceed with your order, let me clarify all the information first to make sure everything is correct."<br>"You bought (QUANTITY) bottles of (PRODUCT NAME)."<br>"The price for that is (PRICE) and the delivery fee is (DELIVERY FEE), so the total would be (TOTAL PRICE)."<br>"It would be delivered at (CLIENT\u2019S ADDRESS). Your email is (EMAIL) and your name is (CLIENT\u2019S NAME)."<br>"Are all my informations correct?"</div>' +
+      '<p>If yes: <em>discuss the delivery terms to the client clearly.</em><br>If not: <em>ask the client which part of it was wrong and try to correct it.</em></p>',
+      'no-close') +
   '</div>';
 }
 
