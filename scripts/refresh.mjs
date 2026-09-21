@@ -8,7 +8,7 @@
  * Safety model: every value this script needs is located by searching the
  * sheet's own header text for a known label, never by a hardcoded column
  * number or row number. If a label can't be found, or a block comes back
- * empty, the script throws and exits non-zero WITHOUT touching index.html —
+ * empty, the script throws and exits non-zero WITHOUT touching index.html  - 
  * so a spreadsheet reorganization fails the GitHub Action run loudly instead
  * of silently publishing wrong data.
  *
@@ -22,8 +22,8 @@
  * Resilience: every fetch is validated against the labels it expects, and
  * retried a couple of times with a cache-busting param before giving up.
  * And instead of stopping at the FIRST problem, every block is checked and
- * every problem found is reported together in one error, so one run — and
- * one round of fixes — can surface everything that needs attention instead
+ * every problem found is reported together in one error, so one run  -  and
+ * one round of fixes  -  can surface everything that needs attention instead
  * of one thing at a time.
  */
 
@@ -32,7 +32,7 @@ import { readFileSync, writeFileSync } from "fs";
 const SHEET_ID = "1NyWkYctFgVEX1q5v_v-XWqPfuw5YhylMfkA6sIfSvoA";
 const FILE = "index.html";
 
-// Tab gids — stable across renames, unlike a tab's name (the Free Gift tab
+// Tab gids  -  stable across renames, unlike a tab's name (the Free Gift tab
 // has already been renamed once). Prefer these over name-based lookups.
 const GID_RANKING = "945544049"; // Ranking/Score
 const GID_PERF = "773896381";    // Performance update
@@ -111,7 +111,7 @@ function requireCol(headerRow, label, opts, sheetLabel) {
 
 // The sheet may have a title/banner row above the real header row, a leading
 // blank row, or a second table stacked well below the first one with its
-// own header row further down — so scan from `from` through the whole
+// own header row further down  -  so scan from `from` through the whole
 // sheet for a row that contains ALL of the given labels, rather than
 // assuming row 0 is it or that every block shares one header row.
 function locateHeaderRow(rows, labels, sheetLabel, { from = 0 } = {}) {
@@ -123,12 +123,12 @@ function locateHeaderRow(rows, labels, sheetLabel, { from = 0 } = {}) {
     `Could not find a header row containing all of [${labels.join(", ")}] ` +
     `in "${sheetLabel}" anywhere from row ${from + 1} onward (${rows.length} rows total). ` +
     `Row ${from + 1} looks like: [${previewRow(rows[from])}]` +
-    (rows[from + 1] ? ` — Row ${from + 2} looks like: [${previewRow(rows[from + 1])}]` : "")
+    (rows[from + 1] ? `  -  Row ${from + 2} looks like: [${previewRow(rows[from + 1])}]` : "")
   );
 }
 
 // Fetches a sheet and confirms it actually contains the labels we expect
-// before trusting it — Google's gviz endpoint has, on occasion, returned a
+// before trusting it  -  Google's gviz endpoint has, on occasion, returned a
 // different sheet's data for a name-based request. Retries with a fresh,
 // cache-busted request a couple of times before giving up, since that kind
 // of mismatch has so far looked transient rather than a real rename.
@@ -178,16 +178,16 @@ async function getValidatedSheetByGid(gid, requiredLabels, sheetLabel, attempts 
 
 function esc(s) { return String(s == null ? "" : s).trim(); }
 
-// JSON.stringify keeps non-ASCII characters (₱, curly quotes, an agent's
+// JSON.stringify keeps non-ASCII characters (the peso sign, curly quotes, an agent's
 // accented name, etc.) as literal UTF-8 bytes in the output. That's fine for
-// this script's own commit — Node writes the file as UTF-8 and git preserves
-// it exactly — but index.html also gets hand-pasted into GitHub's web editor
+// this script's own commit  -  Node writes the file as UTF-8 and git preserves
+// it exactly  -  but index.html also gets hand-pasted into GitHub's web editor
 // from time to time, and that copy/paste path has, in practice, mangled
 // multi-byte characters into mojibake. \u-escaping every non-ASCII character
 // here keeps the generated source pure ASCII, so it survives a copy/paste
 // unchanged no matter what happens on the clipboard.
 function jsEscapeNonAscii(s) {
-  return s.replace(/[\u0080-￿]/g, c => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
+  return s.replace(/[\u0080-\uFFFF]/g, c => "\\u" + c.charCodeAt(0).toString(16).padStart(4, "0"));
 }
 function jstr(s) { return jsEscapeNonAscii(JSON.stringify(esc(s))); }
 
@@ -204,11 +204,11 @@ async function buildRanking() {
   const totalCol = requireCol(header, "TOTAL SCORE", {}, sheetLabel);
   const rankCol = requireCol(header, "Ranking", {}, sheetLabel);
 
-  // The ranking table is one contiguous block right under its header —
+  // The ranking table is one contiguous block right under its header  - 
   // a blank agent cell, or the sheet's own "Total" row, marks the end of
   // it. Stop there (don't just skip past it) so unrelated data further
-  // down the same tab — a different table that happens to reuse these
-  // same columns — never gets vacuumed up into the ranking list.
+  // down the same tab  -  a different table that happens to reuse these
+  // same columns  -  never gets vacuumed up into the ranking list.
   const entries = [];
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
@@ -221,7 +221,7 @@ async function buildRanking() {
     if (!Number.isFinite(score) || !Number.isFinite(total) || !Number.isFinite(rank)) break;
     entries.push({ agent, score, conv: esc(r[convCol]), total, rank });
   }
-  if (entries.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid rows parsed — refusing to publish.`);
+  if (entries.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid rows parsed  -  refusing to publish.`);
 
   const body = entries
     .map(e => `  {agent:${jstr(e.agent)},score:${e.score},conv:${jstr(e.conv)},total:${e.total},rank:${e.rank}}`)
@@ -245,28 +245,31 @@ async function buildPerf(existingAugustLiteral) {
   const callsCol = requireCol(header, "Calls Handled", { mode: "contains", exclude: "previous" }, sheetLabel);
   const convCol = requireCol(header, "Conversion %", { mode: "contains", exclude: "previous" }, sheetLabel);
 
-  // This table has two things above/below the real per-agent rows that
+  // This table has several things above/below the real per-agent rows that
   // aren't agents: an "August" full-month recap row right at the top (its
   // numbers are the same full-month figures preserved separately below as
   // `august`, so it's skipped here rather than listed as an agent), and a
-  // KPI-summary block further down ("Agents Above Previous Pace", "Highest
-  // Improvement", etc., ending in its own unrelated "Total" row that isn't
-  // the real per-agent total). Stop the moment any of those labels shows
-  // up, and compute this table's own Total from the real agent rows
-  // instead of trusting whatever "Total"-labeled row the sheet has.
-  const NON_AGENT_LABELS = [
-    "total", "agents above", "agents below", "metric",
-    "highest improvement", "biggest decline", "months",
-  ];
+  // KPI-summary block further down. Two of those KPI rows ("Agents Above
+  // Previous Pace" / "Agents Below Previous Pace") are real counts worth
+  // keeping, so they're captured into their own `pace` field instead of
+  // being dropped; the rest of that block (Metric, Highest Improvement,
+  // Biggest Decline, Months) and its own unrelated "Total" row are just
+  // noise and get skipped. This table's own Total is computed from the
+  // real agent rows rather than trusted from the sheet.
+  const DROP_LABELS = ["metric", "highest improvement", "biggest decline", "months"];
 
   const agentRows = [];
+  let paceAbove = 0, paceBelow = 0;
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const agent = esc(r[agentCol]);
     if (!agent) break;
     const agentNorm = norm(agent);
     if (agentNorm === "august") continue;
-    if (NON_AGENT_LABELS.some(l => agentNorm.includes(l))) break;
+    if (agentNorm.includes("agents above")) { paceAbove = Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0; continue; }
+    if (agentNorm.includes("agents below")) { paceBelow = Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0; continue; }
+    if (DROP_LABELS.some(l => agentNorm.includes(l))) continue;
+    if (agentNorm.includes("total")) break; // the sheet's own (unrelated) Total row ends this block
     agentRows.push({
       a: agent,
       cur: Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0,
@@ -280,7 +283,7 @@ async function buildPerf(existingAugustLiteral) {
       conv: esc(r[convCol]),
     });
   }
-  if (agentRows.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid agent rows parsed — refusing to publish.`);
+  if (agentRows.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid agent rows parsed  -  refusing to publish.`);
 
   function fmtDiff(cur, prev) {
     const d = cur - prev;
@@ -296,7 +299,7 @@ async function buildPerf(existingAugustLiteral) {
   const totalCalls = agentRows.reduce((s, r) => s + r.callsNum, 0);
   // Average check weighted by each agent's confirmed-order volume, and
   // conversion recomputed the same way the per-agent conversion values
-  // check out (confirmed orders / calls handled) — both real aggregates of
+  // check out (confirmed orders / calls handled)  -  both real aggregates of
   // the agents actually in the table, not a stray sheet total.
   const totalAvg = totalCur ? (agentRows.reduce((s, r) => s + r.avgNum * r.cur, 0) / totalCur) : 0;
   const totalConv = totalCalls ? Math.round((totalCur / totalCalls) * 100) : 0;
@@ -304,7 +307,7 @@ async function buildPerf(existingAugustLiteral) {
     cur: totalCur, prev: totalPrev,
     diff: fmtDiff(totalCur, totalPrev),
     pct: fmtPct(totalCur, totalPrev),
-    avg: "₱" + totalAvg.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    avg: "\u20B1" + totalAvg.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     calls: totalCalls.toLocaleString("en-US"),
     conv: totalConv + "%",
   };
@@ -314,16 +317,18 @@ async function buildPerf(existingAugustLiteral) {
     .join(",\n");
   const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},calls:${jstr(totalRow.calls)},conv:${jstr(totalRow.conv)}}`;
 
-  return `var PERF = {\n  rows:[\n${rowsBody}\n  ],\n  total:${totalBody},\n  august:${existingAugustLiteral}\n};`;
+  const paceBody = `{above:${paceAbove},below:${paceBelow}}`;
+
+  return `var PERF = {\n  rows:[\n${rowsBody}\n  ],\n  total:${totalBody},\n  pace:${paceBody},\n  august:${existingAugustLiteral}\n};`;
 }
 
 // ---------- Day-off requests (now a block within Ranking/Score) ----------
 // The old "Rules and Shift Request" tab (which used to hold the shift
 // schedule and this day-off sign-up list) has been deleted from the sheet.
-// The day-off sign-up list survives as a 5-column block — Name, Off 1,
-// Off 2, Shift, Reason — living somewhere inside the Ranking/Score tab.
+// The day-off sign-up list survives as a 5-column block  -  Name, Off 1,
+// Off 2, Shift, Reason  -  living somewhere inside the Ranking/Score tab.
 // Its exact row/column position has proven unreliable to pin down by
-// inspection, so — as with the old stacked off-request table — this scans
+// inspection, so  -  as with the old stacked off-request table  -  this scans
 // the whole sheet at run time for a row containing "Off 1" rather than
 // trusting a hardcoded position.
 async function buildDayOffRequests() {
@@ -354,7 +359,7 @@ async function buildDayOffRequests() {
     });
   }
   // Day-off requests are allowed to legitimately be empty (nobody asked this
-  // week), so no minimum-count guard here — unlike the other blocks, zero is valid.
+  // week), so no minimum-count guard here  -  unlike the other blocks, zero is valid.
 
   const body = offRequests
     .map(o => `{"name":${jstr(o.name)},"off1":${jstr(o.off1)},"off2":${jstr(o.off2)},"shift":${jstr(o.shift)},"reason":${jstr(o.reason)},"added":false}`)
@@ -371,7 +376,7 @@ async function buildGifts() {
   // Use "contains" rather than an exact match here: this sheet's header
   // cells for this table have turned out to hold more than just the plain
   // label (e.g. "Product" arriving as "Product\nEasy Go Max", collapsed by
-  // norm() to "product easy go max") — the same kind of wrapped/compound
+  // norm() to "product easy go max")  -  the same kind of wrapped/compound
   // header cell seen elsewhere in this sheet, just matched loosely instead
   // of assuming the exact text.
   const header = rows[headerRowIdx];
@@ -386,14 +391,14 @@ async function buildGifts() {
     const product = esc(r[productCol]);
     if (!product) continue;
     // Guard against the header row's own compound text bleeding a duplicate
-    // of the first product into the data range (belt-and-braces — harmless
+    // of the first product into the data range (belt-and-braces  -  harmless
     // if that never actually happens).
     const key = norm(product) + "|" + norm(r[maleCol]) + "|" + norm(r[femaleCol]);
     if (seen.has(key)) continue;
     seen.add(key);
     entries.push([product, esc(r[maleCol]), esc(r[femaleCol])]);
   }
-  if (entries.length < 3) throw new Error(`${sheetLabel}: fewer than 3 rows parsed — refusing to publish.`);
+  if (entries.length < 3) throw new Error(`${sheetLabel}: fewer than 3 rows parsed  -  refusing to publish.`);
 
   const body = entries.map(e => `  [${e.map(jstr).join(",")}]`).join(",\n");
   return `var GIFTS = [\n${body}\n];`;
@@ -405,7 +410,7 @@ function replaceBlock(html, markerName, newLiteral) {
   const startIdx = html.indexOf(start);
   const endIdx = html.indexOf(end);
   if (startIdx === -1 || endIdx === -1 || endIdx < startIdx) {
-    throw new Error(`Marker pair AUTO-${markerName} not found in ${FILE} — was it edited by hand?`);
+    throw new Error(`Marker pair AUTO-${markerName} not found in ${FILE}  -  was it edited by hand?`);
   }
   const before = html.slice(0, startIdx + start.length);
   const after = html.slice(endIdx);
@@ -416,14 +421,14 @@ async function main() {
   let html = readFileSync(FILE, "utf8");
 
   // Pull out whatever August/whole-month literal is currently in the file so
-  // we can preserve it verbatim — that block isn't sourced from a reliably
+  // we can preserve it verbatim  -  that block isn't sourced from a reliably
   // parseable part of the sheet, so it's maintained by hand, not refreshed here.
   const augustMatch = html.match(/august:(\{[^}]*\})/);
   if (!augustMatch) throw new Error("Could not find existing 'august' block in PERF to preserve it.");
   const existingAugustLiteral = augustMatch[1];
 
   // Run every block and collect ALL problems in one pass (rather than
-  // stopping at the first), so a single run — and a single round of fixes —
+  // stopping at the first), so a single run  -  and a single round of fixes  - 
   // can surface everything that needs attention at once.
   const jobs = [
     { name: "Ranking", run: () => buildRanking() },
@@ -439,7 +444,7 @@ async function main() {
 
   if (failures.length) {
     const summary = failures
-      .map(f => `— ${f.name}: ${f.r.reason && f.r.reason.message ? f.r.reason.message : f.r.reason}`)
+      .map(f => ` -  ${f.name}: ${f.r.reason && f.r.reason.message ? f.r.reason.message : f.r.reason}`)
       .join("\n");
     throw new Error(`${failures.length} of ${jobs.length} block(s) failed to refresh:\n${summary}`);
   }
@@ -456,7 +461,7 @@ async function main() {
 }
 
 main().catch(err => {
-  console.error("Refresh aborted — index.html was NOT modified.");
+  console.error("Refresh aborted  -  index.html was NOT modified.");
   console.error(err.message || err);
   process.exit(1);
 });
