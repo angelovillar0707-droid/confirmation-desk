@@ -138,8 +138,23 @@
 
 <script id="page-script">
 var ACTIVE = "ranking";
+/*AUTO-STATE-START*/
 var STATE = {"offRequests":[{"name":"Raysan Garganta","off1":"Monday","off2":"Tuesday","shift":"Morning","reason":"","added":false},{"name":"Marianne Visda","off1":"Tuesday","off2":"Wednesday","shift":"Morning","reason":"","added":false},{"name":"Karen Dilig","off1":"Wednesday","off2":"Sunday","shift":"Afternoon","reason":"Officer duty / church","added":false},{"name":"Joyce Malapitan","off1":"Wednesday","off2":"Sunday","shift":"Morning","reason":"Weekly visit to parents in Bulacan","added":false},{"name":"Bhea Cuenca","off1":"Wednesday","off2":"Thursday","shift":"Morning","reason":"Check-up and vaccination date for my child","added":false}]};
+/*AUTO-STATE-END*/
+var LEAVE_STATE = {"leaveRequests":[{"name":"Angelo","start":"Oct 1","end":"Oct 10","reason":"Birthday ng langgam ko","added":false},{"name":"Lanlie","start":"Oct 1","end":"Oct 3","reason":"Father's bday and school program","added":false},{"name":"Joyce","start":"","end":"","reason":"Uuwi po ng province for personal matters","added":false},{"name":"Carmina","start":"","end":"","reason":"Family reunion sa province","added":false},{"name":"Jasmin","start":"Oct 5","end":"Oct 7","reason":"Family gathering","added":false}]};
 
+var LATE_LOG = [
+  {agent:"Filipina Bonifacio",date:"Sept 9",count:1},
+  {agent:"Christian Tad-y",date:"Sept 7",count:1},
+  {agent:"Marianne Visda",date:"Sept 6",count:1},
+  {agent:"Joyce Malapitan",date:"Sept 17",count:1},
+  {agent:"Joyce Malapitan",date:"Sept 18",count:2},
+  {agent:"Carmina Fernandez",date:"Sept 4",count:1},
+  {agent:"Raysan Garganta",date:"Sept 15",count:1},
+  {agent:"John Jamero",date:"Sept 7",count:1}
+];
+
+/*AUTO-RANKING-START*/
 var RANKING = [
   {agent:"Joyce Malapitan",score:24,conv:"16.44%",total:92.9,rank:1},
   {agent:"Mary Fontanilla",score:28,conv:"10.37%",total:81.5,rank:2},
@@ -161,33 +176,37 @@ var RANKING = [
   {agent:"Bhea Cuenca",score:4,conv:"2.80%",total:15.7,rank:18},
   {agent:"Lanlie Mayor",score:4,conv:"2.70%",total:15.4,rank:19}
 ].sort(function(a,b){return a.rank-b.rank;});
+/*AUTO-RANKING-END*/
 
+/*AUTO-PERF-START*/
 var PERF = {
   rows:[
-    {a:"Mary Fontanilla",cur:71,prev:58,diff:"+13",pct:"22%",avg:"₱2,533.96",calls:447,conv:"16%"},
-    {a:"Merly Palomares",cur:48,prev:39,diff:"+9",pct:"23%",avg:"₱2,926.33",calls:330,conv:"15%"},
-    {a:"Sharon SanJuan",cur:44,prev:26,diff:"+18",pct:"69%",avg:"₱2,942.02",calls:323,conv:"14%"},
-    {a:"Dhanica Dadoya",cur:50,prev:35,diff:"+15",pct:"43%",avg:"₱2,376.84",calls:385,conv:"13%"},
-    {a:"Jonaliza Guevarra",cur:29,prev:0,diff:"+29",pct:"2900%",avg:"₱2,682.76",calls:244,conv:"12%"},
-    {a:"Reynalyn Roco",cur:26,prev:19,diff:"+7",pct:"37%",avg:"₱2,877.54",calls:136,conv:"19%"},
-    {a:"Christian Tad-y",cur:26,prev:21,diff:"+5",pct:"24%",avg:"₱2,582.23",calls:328,conv:"8%"},
-    {a:"Jubel Siagan",cur:39,prev:24,diff:"+15",pct:"63%",avg:"₱2,975.62",calls:184,conv:"21%"},
-    {a:"Joyce Malapitan",cur:39,prev:31,diff:"+8",pct:"26%",avg:"₱2,413.15",calls:204,conv:"19%"},
-    {a:"Jasmin Aruta",cur:26,prev:14,diff:"+12",pct:"86%",avg:"₱2,578.27",calls:263,conv:"10%"},
-    {a:"Karen Dilig",cur:31,prev:0,diff:"+31",pct:"3100%",avg:"₱2,837.29",calls:330,conv:"9%"},
-    {a:"Marianne Visda",cur:31,prev:29,diff:"+2",pct:"7%",avg:"₱2,528.39",calls:294,conv:"11%"},
-    {a:"Filipina Bonifacio",cur:30,prev:35,diff:"-5",pct:"-14%",avg:"₱2,758.97",calls:316,conv:"9%"},
-    {a:"Trina Idaloy",cur:16,prev:11,diff:"+5",pct:"45%",avg:"₱2,513.56",calls:240,conv:"7%"},
-    {a:"Raysan Garganta",cur:25,prev:11,diff:"+14",pct:"127%",avg:"₱2,638.64",calls:273,conv:"9%"},
-    {a:"Bhea Cuenca",cur:10,prev:0,diff:"+10",pct:"1000%",avg:"₱2,500.00",calls:140,conv:"7%"},
-    {a:"John Jamero",cur:8,prev:10,diff:"-2",pct:"-20%",avg:"₱2,586.50",calls:143,conv:"6%"},
-    {a:"Carmina Fernandez",cur:12,prev:16,diff:"-4",pct:"-25%",avg:"₱2,675.50",calls:234,conv:"5%"},
-    {a:"Lanlie Mayor",cur:12,prev:25,diff:"-13",pct:"-52%",avg:"₱2,514.75",calls:248,conv:"5%"}
+    {a:"Mary Fontanilla",cur:71,prev:58,diff:"+13",pct:"22%",avg:"â‚±2,533.96",calls:447,conv:"16%"},
+    {a:"Merly Palomares",cur:48,prev:39,diff:"+9",pct:"23%",avg:"â‚±2,926.33",calls:330,conv:"15%"},
+    {a:"Sharon SanJuan",cur:44,prev:26,diff:"+18",pct:"69%",avg:"â‚±2,942.02",calls:323,conv:"14%"},
+    {a:"Dhanica Dadoya",cur:50,prev:35,diff:"+15",pct:"43%",avg:"â‚±2,376.84",calls:385,conv:"13%"},
+    {a:"Jonaliza Guevarra",cur:29,prev:0,diff:"+29",pct:"2900%",avg:"â‚±2,682.76",calls:244,conv:"12%"},
+    {a:"Reynalyn Roco",cur:26,prev:19,diff:"+7",pct:"37%",avg:"â‚±2,877.54",calls:136,conv:"19%"},
+    {a:"Christian Tad-y",cur:26,prev:21,diff:"+5",pct:"24%",avg:"â‚±2,582.23",calls:328,conv:"8%"},
+    {a:"Jubel Siagan",cur:39,prev:24,diff:"+15",pct:"63%",avg:"â‚±2,975.62",calls:184,conv:"21%"},
+    {a:"Joyce Malapitan",cur:39,prev:31,diff:"+8",pct:"26%",avg:"â‚±2,413.15",calls:204,conv:"19%"},
+    {a:"Jasmin Aruta",cur:26,prev:14,diff:"+12",pct:"86%",avg:"â‚±2,578.27",calls:263,conv:"10%"},
+    {a:"Karen Dilig",cur:31,prev:0,diff:"+31",pct:"3100%",avg:"â‚±2,837.29",calls:330,conv:"9%"},
+    {a:"Marianne Visda",cur:31,prev:29,diff:"+2",pct:"7%",avg:"â‚±2,528.39",calls:294,conv:"11%"},
+    {a:"Filipina Bonifacio",cur:30,prev:35,diff:"-5",pct:"-14%",avg:"â‚±2,758.97",calls:316,conv:"9%"},
+    {a:"Trina Idaloy",cur:16,prev:11,diff:"+5",pct:"45%",avg:"â‚±2,513.56",calls:240,conv:"7%"},
+    {a:"Raysan Garganta",cur:25,prev:11,diff:"+14",pct:"127%",avg:"â‚±2,638.64",calls:273,conv:"9%"},
+    {a:"Bhea Cuenca",cur:10,prev:0,diff:"+10",pct:"1000%",avg:"â‚±2,500.00",calls:140,conv:"7%"},
+    {a:"John Jamero",cur:8,prev:10,diff:"-2",pct:"-20%",avg:"â‚±2,586.50",calls:143,conv:"6%"},
+    {a:"Carmina Fernandez",cur:12,prev:16,diff:"-4",pct:"-25%",avg:"â‚±2,675.50",calls:234,conv:"5%"},
+    {a:"Lanlie Mayor",cur:12,prev:25,diff:"-13",pct:"-52%",avg:"â‚±2,514.75",calls:248,conv:"5%"}
   ],
-  total:{cur:573,prev:404,diff:"+169",pct:"42%",avg:"₱2,781.64",calls:"5,062",conv:"11%"},
-  august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"₱2,514.73",avgPrev:"₱2,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
+  total:{cur:573,prev:404,diff:"+169",pct:"42%",avg:"â‚±2,781.64",calls:"5,062",conv:"11%"},
+  august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"â‚±2,514.73",avgPrev:"â‚±2,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
 };
+/*AUTO-PERF-END*/
 
+/*AUTO-GIFTS-START*/
 var GIFTS = [
   ["Easy Go Max","Easy Go","Easy Go"],["Arti-flex","Easy Go","Easy Go"],["Optiheal","Easy Go","Easy Go"],
   ["Footurel","Easy Go","Easy Go"],["Variflex","Easy Go","Easy Go"],["D-Up","Prostaman","Prostaman"],
@@ -196,11 +215,12 @@ var GIFTS = [
   ["Ketonica","Variflex","Retinlift"],["Wellatox","Variflex","Retinlift"],["Rootera","Variflex","Retinlift"],
   ["Retinlift","Footurel Gel","Variflex"],["Easy Go","Easy Go","Easy Go"]
 ];
+/*AUTO-GIFTS-END*/
 
 var REDELIVERY = {
   reject:[
     ["Order Already Received from Us","The customer informs us that they have already received the order from us."],
-    ["No Response","The customer has consistently not responded, and no further attempts will be made. Automatic rejection only — not for manual use."],
+    ["No Response","The customer has consistently not responded, and no further attempts will be made. Automatic rejection only â€” not for manual use."],
     ["Unwilling to Pay Delivery Fee","The customer refuses to pay the delivery fee and does not want to redeem the package."],
     ["Unsatisfactory Delivery Conditions","The customer is dissatisfied with the delivery conditions and opts to reject the order."],
     ["Advised Against Purchase by Doctor","The customer was advised by a doctor not to proceed with the purchase."],
@@ -231,9 +251,10 @@ var REDELIVERY = {
   ]
 };
 
+/*AUTO-SCHEDULE-START*/
 var SCHEDULE = [
   {agent:"Jubel",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","",""]},
-  {agent:"—",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
+  {agent:"â€”",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
   {agent:"Marianne",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
   {agent:"Joyce",days:["08:00-17:00","","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
   {agent:"Merly",days:["08:00-17:00","08:00-17:00","","","08:00-17:00","08:00-17:00","08:00-17:00"]},
@@ -241,17 +262,18 @@ var SCHEDULE = [
   {agent:"Dhanica",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","","","08:00-17:00"]},
   {agent:"Sharon",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","",""]},
   {agent:"Jasmin",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
-  {agent:"—",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
-  {agent:"—",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"â€”",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
+  {agent:"â€”",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
   {agent:"Reynalyn",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]},
-  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00"]},
-  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","",""]},
-  {agent:"—",days:["","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"—",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"—",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"—",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]}
+  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]},
+  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00"]},
+  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","",""]},
+  {agent:"â€”",days:["","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"â€”",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"â€”",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
+  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]}
 ];
+/*AUTO-SCHEDULE-END*/
 
 var CALLBACKS = [
   {agent:"Christian",hash:"X3Kg1aYg8n1zwJA",type:"Remarketing",date:"Sept 21",reason:"Wants to be a reseller"},
@@ -270,7 +292,7 @@ var CALLBACKS = [
 var REFERRALS = [
   {agent:"Dhanica",prevHash:"yPXV1EREEe0j6zE",prevClient:"Gaspas Monoten P",name:"Juanita Monoten",contact:"9177988617",relation:"Spouse",product:"Glucofortis"},
   {agent:"Filipina",prevHash:"ZMVW1WRyP7ObwvA",prevClient:"Juna L Jabla",name:"Junmar Lawas",contact:"9758895982",relation:"Sibling",product:"Glucofortis"},
-  {agent:"Jona",prevHash:"Sale #LBwn1lX3DM1KNGz",prevClient:"Josie Castillo Peralta",name:"Josie Castillo Peralta",contact:"—",relation:"Same client, new number",product:"Easy Go Max"},
+  {agent:"Jona",prevHash:"Sale #LBwn1lX3DM1KNGz",prevClient:"Josie Castillo Peralta",name:"Josie Castillo Peralta",contact:"â€”",relation:"Same client, new number",product:"Easy Go Max"},
   {agent:"Sharon",prevHash:"ogvzOLRDXo0EqYW",prevClient:"Jessie Mangay",name:"Ganie Raganas Mangay",contact:"9502667914",relation:"Client's uncle",product:"Vitaman Plus"}
 ];
 
@@ -283,8 +305,8 @@ function pillPct(p){
 function renderNav(active, sections){
   var groups = [
     {label:"Performance", items:["ranking","performance"]},
-    {label:"Team", items:["shifts"]},
-    {label:"Playbooks", items:["remarketing","notordered"]},
+    {label:"Team", items:["shifts","leaveTracker"]},
+    {label:"Playbooks", items:["remarketing","notordered","redeliveryAlgo"]},
     {label:"Reference", items:["gifts","redelivery"]},
     {label:"Follow-up", items:["callbacks"]}
   ];
@@ -299,14 +321,16 @@ function renderNav(active, sections){
 }
 
 var SECTIONS = {
-  ranking:{icon:"🏆", label:"Ranking & Score", eyebrow:"Performance", title:"Ranking & Score", desc:"Weekly agent ranking by score and confirmation-call conversion rate."},
-  performance:{icon:"📈", label:"Performance Update", eyebrow:"Performance", title:"Performance Update", desc:"Month-to-date confirmed orders vs. the same point last month, by agent."},
-  shifts:{icon:"📅", label:"Shift & Time-Off", eyebrow:"Team", title:"Shift & Time-Off Requests", desc:"This week's shift schedule, plus a running sign-up sheet for day-off requests."},
-  remarketing:{icon:"☎️", label:"Remarketing Call Flow", eyebrow:"Playbook", title:"Remarketing Call Flow", desc:"Script and decision paths for reconnecting with past customers."},
-  notordered:{icon:"🔍", label:"Not-Ordered Script", eyebrow:"Playbook", title:"Not-Ordered Algo", desc:"How to handle a customer who doesn't recognize the order on file."},
-  gifts:{icon:"🎁", label:"Free Gift Guide", eyebrow:"Reference", title:"Free Gift Guide", desc:"Which free gift to offer by product and recipient gender."},
-  redelivery:{icon:"📦", label:"Redelivery Reasons", eyebrow:"Reference", title:"Redelivery Tagging", desc:"Standard reason codes for rejected orders and for redelivery approvals."},
-  callbacks:{icon:"☎️", label:"Manual Callbacks", eyebrow:"Follow-up", title:"Manual Callbacks", desc:"Scheduled callback list and open referral leads."}
+  ranking:{icon:"ðŸ†", label:"Ranking & Score", eyebrow:"Performance", title:"Ranking & Score", desc:"Weekly agent ranking by score and confirmation-call conversion rate."},
+  performance:{icon:"ðŸ“ˆ", label:"Performance Update", eyebrow:"Performance", title:"Performance Update", desc:"Month-to-date confirmed orders vs. the same point last month, by agent."},
+  shifts:{icon:"ðŸ“…", label:"Shift & Time-Off", eyebrow:"Team", title:"Shift & Time-Off Requests", desc:"This week's shift schedule, plus a running sign-up sheet for day-off requests."},
+  leaveTracker:{icon:"ðŸ—“ï¸", label:"Leave & Late Tracker", eyebrow:"Team", title:"Leave & Late Tracker", desc:"Logged lateness for reference, plus a sign-up sheet for leave requests."},
+  remarketing:{icon:"â˜Žï¸", label:"Remarketing Call Flow", eyebrow:"Playbook", title:"Remarketing Call Flow", desc:"Script and decision paths for reconnecting with past customers."},
+  notordered:{icon:"ðŸ”", label:"Not-Ordered Script", eyebrow:"Playbook", title:"Not-Ordered Algo", desc:"How to handle a customer who doesn't recognize the order on file."},
+  redeliveryAlgo:{icon:"ðŸ“ž", label:"Redelivery Algorithm", eyebrow:"Playbook", title:"Redelivery Sales Algorithm", desc:"Script and decision paths for reconnecting on a failed or returned delivery."},
+  gifts:{icon:"ðŸŽ", label:"Free Gift Guide", eyebrow:"Reference", title:"Free Gift Guide", desc:"Which free gift to offer by product and recipient gender."},
+  redelivery:{icon:"ðŸ“¦", label:"Redelivery Reasons", eyebrow:"Reference", title:"Redelivery Tagging", desc:"Standard reason codes for rejected orders and for redelivery approvals."},
+  callbacks:{icon:"â˜Žï¸", label:"Manual Callbacks", eyebrow:"Follow-up", title:"Manual Callbacks", desc:"Scheduled callback list and open referral leads."}
 };
 
 function rankingView(){
@@ -316,10 +340,10 @@ function rankingView(){
   }).join("");
   return '' +
   '<div class="card">' +
-    '<h2>Weekly ranking</h2><div class="sub">Sorted by rank — total score blends call volume, conversion, and quality checks.</div>' +
+    '<h2>Weekly ranking</h2><div class="sub">Sorted by rank â€” total score blends call volume, conversion, and quality checks.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th class="num">Rank</th><th>Agent</th><th class="num">Weekly Score</th><th class="num">Conversion %</th><th class="num">Total Score</th></tr></thead><tbody>'+rows+'</tbody></table></div>' +
   '</div>' +
-  '<div class="card"><h2>A note on this tab</h2><div class="sub" style="margin-bottom:0">The sheet also has a larger monthly figures block next to this table without header labels I could confidently match to columns — rather than guess at what each number means, it’s left out here. Happy to add it once the column meanings are confirmed.</div></div>';
+  '<div class="card"><h2>A note on this tab</h2><div class="sub" style="margin-bottom:0">The sheet also has a larger monthly figures block next to this table without header labels I could confidently match to columns â€” rather than guess at what each number means, itâ€™s left out here. Happy to add it once the column meanings are confirmed.</div></div>';
 }
 
 function performanceView(){
@@ -330,18 +354,18 @@ function performanceView(){
   return '' +
   '<div class="tiles">' +
     '<div class="tile"><div class="k">Confirmed Orders (MTD)</div><div class="v">'+t.cur+'</div><div class="d up">'+t.diff+' vs. same date last month ('+t.pct+')</div></div>' +
-    '<div class="tile"><div class="k">Average Check</div><div class="v">'+esc(t.avg)+'</div><div class="d">vs. ₱2,627.10 last month</div></div>' +
+    '<div class="tile"><div class="k">Average Check</div><div class="v">'+esc(t.avg)+'</div><div class="d">vs. â‚±2,627.10 last month</div></div>' +
     '<div class="tile"><div class="k">Calls Handled</div><div class="v">'+t.calls+'</div><div class="d">Conversion '+esc(t.conv)+'</div></div>' +
     '<div class="tile"><div class="k">Full Month (August)</div><div class="v">'+a.cur+'</div><div class="d up">'+a.diff+' vs. July ('+a.pct+')</div></div>' +
   '</div>' +
   '<div class="card">' +
-    '<h2>Agents — month to date</h2><div class="sub">Current MTD confirmed orders vs. the same date last month, sorted by current volume.</div>' +
+    '<h2>Agents â€” month to date</h2><div class="sub">Current MTD confirmed orders vs. the same date last month, sorted by current volume.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th>Agent</th><th class="num">Current MTD</th><th class="num">Previous MTD</th><th class="num">Difference</th><th class="num">% Change</th><th class="num">Avg. Check</th><th class="num">Calls Handled</th><th class="num">Conversion</th></tr></thead><tbody>'+rows+
     '<tr class="total-row"><td>Total</td><td class="num">'+t.cur+'</td><td class="num">'+t.prev+'</td><td class="num">'+t.diff+'</td><td class="num">'+t.pct+'</td><td class="num">'+esc(t.avg)+'</td><td class="num">'+t.calls+'</td><td class="num">'+t.conv+'</td></tr>' +
     '</tbody></table></div>' +
   '</div>' +
   '<div class="card">' +
-    '<h2>Full-month comparison — August</h2><div class="sub">Whole-month totals, current vs. previous.</div>' +
+    '<h2>Full-month comparison â€” August</h2><div class="sub">Whole-month totals, current vs. previous.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th></th><th class="num">Confirmed Orders</th><th class="num">Avg. Check</th><th class="num">Calls Handled</th><th class="num">Conversion</th></tr></thead><tbody>' +
     '<tr><td>Current</td><td class="num">'+a.cur+'</td><td class="num">'+esc(a.avgCur)+'</td><td class="num">'+a.callsCur+'</td><td class="num">'+a.convCur+'</td></tr>' +
     '<tr><td>Previous</td><td class="num">'+a.prev+'</td><td class="num">'+esc(a.avgPrev)+'</td><td class="num">'+a.callsPrev+'</td><td class="num">'+a.convPrev+'</td></tr>' +
@@ -352,7 +376,7 @@ function performanceView(){
 function scheduleView(){
   var head = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
   var rows = SCHEDULE.map(function(r,i){
-    var cells = r.days.map(function(d){return '<td class="num">'+(d||"—")+'</td>';}).join("");
+    var cells = r.days.map(function(d){return '<td class="num">'+(d||"â€”")+'</td>';}).join("");
     return '<tr><td>'+(i+1)+'</td><td>'+esc(r.agent)+'</td>'+cells+'</tr>';
   }).join("");
   return '<div class="tablewrap"><table class="grid"><thead><tr><th>#</th><th>Agent</th>'+head.map(function(h){return '<th class="num">'+h+'</th>';}).join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
@@ -360,14 +384,14 @@ function scheduleView(){
 
 function offRequestRows(){
   return STATE.offRequests.map(function(r,i){
-    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+(r.added?'<span class="badge-added">added</span>':'')+'</td><td>'+esc(r.off1)+'</td><td>'+esc(r.off2)+'</td><td>'+esc(r.shift)+'</td><td class="wrap">'+esc(r.reason||"—")+'</td></tr>';
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+(r.added?'<span class="badge-added">added</span>':'')+'</td><td>'+esc(r.off1)+'</td><td>'+esc(r.off2)+'</td><td>'+esc(r.shift)+'</td><td class="wrap">'+esc(r.reason||"â€”")+'</td></tr>';
   }).join("");
 }
 
 function shiftsView(){
   return '' +
   '<div class="card">' +
-    '<h2>This week’s shift schedule</h2><div class="sub">Assigned working hours, Monday through Sunday.</div>' +
+    '<h2>This weekâ€™s shift schedule</h2><div class="sub">Assigned working hours, Monday through Sunday.</div>' +
     scheduleView() +
   '</div>' +
   '<div class="card">' +
@@ -390,9 +414,44 @@ function shiftsView(){
   '</div>';
 }
 
+function leaveRequestRows(){
+  return LEAVE_STATE.leaveRequests.map(function(r,i){
+    var dates = (r.start||r.end) ? (esc(r.start||"â€”")+' â€“ '+esc(r.end||"â€”")) : "â€”";
+    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+(r.added?'<span class="badge-added">added</span>':'')+'</td><td>'+dates+'</td><td class="wrap">'+esc(r.reason||"â€”")+'</td></tr>';
+  }).join("");
+}
+
+function leaveTrackerView(){
+  var lateRows = LATE_LOG.map(function(l){
+    return '<tr><td>'+esc(l.agent)+'</td><td>'+esc(l.date)+'</td><td class="num">'+l.count+'</td></tr>';
+  }).join("");
+  return '' +
+  '<div class="card">' +
+    '<h2>Late log</h2><div class="sub">Logged lateness by date, for reference â€” view only, kept in sync from the tracker sheet.</div>' +
+    '<div class="tablewrap"><table class="grid"><thead><tr><th>Agent</th><th>Date</th><th class="num">Times</th></tr></thead><tbody>'+lateRows+'</tbody></table></div>' +
+  '</div>' +
+  '<div class="card">' +
+    '<h2>Leave requests</h2><div class="sub">Add your name below to request a leave. This is the only part of this page agents can add to.</div>' +
+    '<div class="tablewrap"><table class="grid" id="leavetable"><thead><tr><th>#</th><th>Agent</th><th>Dates</th><th>Reason</th></tr></thead><tbody>'+leaveRequestRows()+'</tbody></table></div>' +
+    '<h3 style="margin-top:18px;font-size:14px;">Add your request</h3>' +
+    '<form id="leaveform" autocomplete="off">' +
+      '<div class="formrow">' +
+        '<div><label for="l-name">Your name</label><input id="l-name" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
+        '<div><label for="l-start">Start date</label><input id="l-start" maxlength="20" placeholder="e.g. Oct 12"></div>' +
+        '<div><label for="l-end">End date</label><input id="l-end" maxlength="20" placeholder="e.g. Oct 14"></div>' +
+      '</div>' +
+      '<div class="formrow" style="grid-template-columns:1fr;">' +
+        '<div><label for="l-reason">Reason</label><input id="l-reason" required maxlength="120" placeholder="e.g. family event, medical appointment"></div>' +
+      '</div>' +
+      '<button type="submit" class="btn" id="l-submit">Add my name</button>' +
+      '<div class="savemsg" id="l-msg"></div>' +
+    '</form>' +
+  '</div>';
+}
+
 function giftsView(){
   var rows = GIFTS.map(function(g){return '<tr><td>'+esc(g[0])+'</td><td>'+esc(g[1])+'</td><td>'+esc(g[2])+'</td></tr>';}).join("");
-  return '<div class="card"><h2>Free gift by product</h2><div class="sub">Offer the matching free gift based on the customer’s product and gender.</div>' +
+  return '<div class="card"><h2>Free gift by product</h2><div class="sub">Offer the matching free gift based on the customerâ€™s product and gender.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th>Product</th><th>Male Gift</th><th>Female Gift</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>';
 }
 
@@ -440,13 +499,13 @@ function remarketingView(){
       pathStep("Explain the Purpose","Briefly explain that the call is to check on their experience and see if there is anything you can assist with.") +
       pathStep("Invite the Conversation","Give the customer an opportunity to respond naturally before moving into discovery or recommendations.") +
       '<div class="script">"Hello, good afternoon. May I speak with (CLIENT NAME)?"</div>' +
-      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME), Product Specialist from (COMPANY). We noticed that you previously ordered (PRODUCT NAME) from us, so I’m reaching out to check how you’re doing and how your experience has been so far."</div>' +
-      '<div class="script">"We regularly follow up with our customers to see how they’re doing and if there’s anything we can assist you with."</div>',
+      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME), Product Specialist from (COMPANY). We noticed that you previously ordered (PRODUCT NAME) from us, so Iâ€™m reaching out to check how youâ€™re doing and how your experience has been so far."</div>' +
+      '<div class="script">"We regularly follow up with our customers to see how theyâ€™re doing and if thereâ€™s anything we can assist you with."</div>',
       'greet') +
     stage(2,"Customer engagement & discovery",
-      '<p>Reconnect with the customer and rebuild rapport first. Acknowledge their situation and ask how their experience has been so far. Understand whether they were able to use the product consistently, ask if they’ve already finished using it, and explore how they felt after using it — listen carefully to their needs, concerns, and current status.</p>' +
-      '<p>If the customer shows interest, need, or intent to repurchase, transition naturally into the recommendation or offer. If they’re still undecided, offer support and continue the conversation without hard selling, and respect their response to keep the relationship warm.</p>' +
-      '<p><strong>Before moving on:</strong> find out whether the client hasn’t started the product yet, has started but not finished, or has already finished the previous order — that determines which path below to take.</p>',
+      '<p>Reconnect with the customer and rebuild rapport first. Acknowledge their situation and ask how their experience has been so far. Understand whether they were able to use the product consistently, ask if theyâ€™ve already finished using it, and explore how they felt after using it â€” listen carefully to their needs, concerns, and current status.</p>' +
+      '<p>If the customer shows interest, need, or intent to repurchase, transition naturally into the recommendation or offer. If theyâ€™re still undecided, offer support and continue the conversation without hard selling, and respect their response to keep the relationship warm.</p>' +
+      '<p><strong>Before moving on:</strong> find out whether the client hasnâ€™t started the product yet, has started but not finished, or has already finished the previous order â€” that determines which path below to take.</p>',
       'discover') +
     stage(3,"Situation paths",
       '<div class="pathgrid">' +
@@ -454,18 +513,18 @@ function remarketingView(){
           pathStep("Show Understanding","Acknowledge the client's situation and calmly ask why they have not started.") +
           pathStep("Understand the Need","Ask about their current concern and identify the main issue they want to address.") +
           pathStep("Address Before Recommending","Resolve or address the reason for not starting first. If appropriate, recommend an approved related product based on their stated need.") +
-          pathStep("If They Want to Wait","Offer a callback at the earliest reasonable time and tag <em>Call Later – Has Not Started</em>.") +
+          pathStep("If They Want to Wait","Offer a callback at the earliest reasonable time and tag <em>Call Later â€“ Has Not Started</em>.") +
           pathStep("If They Decline","Respect the decision and tag <em>Changed Mind</em>.") +
           offerBox(["Offer the related product with a 40% discount."]) +
         '</div>' +
         '<div class="pathcard"><h4>Client Started Taking the Product but Has Not Finished</h4>' +
           pathStep("Check the Client's Progress","Ask about the client's experience, consistency of use, remaining supply, and any improvements or concerns.") +
           pathStep("Respond Based on the Client's Experience","If the client is improving, reinforce consistent use and the importance of completing the intended course. If there's no improvement or the client has concerns, understand the situation first and follow the approved guidance.") +
-          pathStep("If the Client Still Has Enough Product","Do not push an immediate refill. If appropriate, schedule <em>Call Later – Has Not Finished</em> closer to when the client is expected to complete their supply.") +
+          pathStep("If the Client Still Has Enough Product","Do not push an immediate refill. If appropriate, schedule <em>Call Later â€“ Has Not Finished</em> closer to when the client is expected to complete their supply.") +
           pathStep("If the Client Is Nearly Finished","If the client is satisfied with the product, naturally transition into a refill discussion or a relevant product recommendation.") +
-          pathStep("Use Previous Usage as a Guide","Use the client's previous purchase and actual usage to guide the recommendation. The suggested quantity is only a guide and is not mandatory — the final decision always belongs to the client.") +
+          pathStep("Use Previous Usage as a Guide","Use the client's previous purchase and actual usage to guide the recommendation. The suggested quantity is only a guide and is not mandatory â€” the final decision always belongs to the client.") +
           pathStep("Explore Relevant Opportunities","If the client reports a negative experience, understand the reason first. Only recommend another product when it is relevant and approved. Ask whether a family member has a similar concern.") +
-          offerBox(["Previous 3 pcs → consider 2 pcs","Previous 2 pcs → consider 3 pcs","Previous 1 pc → consider 3 pcs","Previous 5+ pcs → reinforce consistent use or continuation when appropriate"]) +
+          offerBox(["Previous 3 pcs â†’ consider 2 pcs","Previous 2 pcs â†’ consider 3 pcs","Previous 1 pc â†’ consider 3 pcs","Previous 5+ pcs â†’ reinforce consistent use or continuation when appropriate"]) +
         '</div>' +
         '<div class="pathcard"><h4>Client Not Improving</h4>' +
           pathStep("Understand the Client's Experience","Ask about product usage, consistency, previous supply, expected results, changes in their original concern, progress made, and any concerns or unwanted reactions.") +
@@ -473,17 +532,17 @@ function remarketingView(){
           pathStep("Follow Approved Product Guidance","Based on the client's situation and the approved guidance, proceed with the appropriate recommendation, suggest a relevant related product, or escalate the concern when necessary.") +
           pathStep("Present the Appropriate Offer","When a recommendation is appropriate, present the offer using the current approved Offer Matrix, including the correct pricing and discounts.") +
           pathStep("Handle Hesitation Naturally and Professionally","Acknowledge their experience and explore the reason for their hesitation. Respond to the specific concern clearly and without pressure.") +
-          pathStep("If the Client Declines","Respect the decision. If the reason is no money, offer a callback at the earliest reasonable date — no more than one callback attempt.") +
+          pathStep("If the Client Declines","Respect the decision. If the reason is no money, offer a callback at the earliest reasonable date â€” no more than one callback attempt.") +
           pathStep("If Another Product Is Needed","Gather the necessary details and present the appropriate approved cross-sell.") +
-          offerBox(["Offer 1: 3 pcs and 2 pcs, original price","Offer 2: 3 pcs and 2 pcs, with discount","Handle objection → offer another/related product, can be with discount right away"]) +
+          offerBox(["Offer 1: 3 pcs and 2 pcs, original price","Offer 2: 3 pcs and 2 pcs, with discount","Handle objection â†’ offer another/related product, can be with discount right away"]) +
         '</div>' +
         '<div class="pathcard"><h4>Client Satisfied / Ready to Continue</h4>' +
           pathStep("Reinforce the Positive Experience","Acknowledge the client's positive experience and confirm their interest in continuing.") +
           pathStep("Recommend the Next Purchase","Use the client's previous purchase, actual usage, and current situation to guide the appropriate refill or continuation recommendation. Use only approved quantities and the current Offer Matrix for pricing and discounts.") +
           pathStep("Handle Hesitation Naturally","Acknowledge their experience and ask what's making them unsure about continuing. Address the specific concern and reinforce the relevant value without applying pressure.") +
-          pathStep("If the Client Declines","Respect the client's decision. If the reason is no money, offer a callback only when appropriate — maximum one callback.") +
+          pathStep("If the Client Declines","Respect the client's decision. If the reason is no money, offer a callback only when appropriate â€” maximum one callback.") +
           pathStep("Explore Relevant Opportunities","If the client has another relevant need, gather the necessary information and present an appropriate approved cross-sell.") +
-          offerBox(["Offer 1: 3 pcs, original price","Offer 2: 3 pcs with 40% discount","Offer 3: 2 pcs with 40% discount","Handle objection → offer another/related product, can be with discount right away"]) +
+          offerBox(["Offer 1: 3 pcs, original price","Offer 2: 3 pcs with 40% discount","Offer 3: 2 pcs with 40% discount","Handle objection â†’ offer another/related product, can be with discount right away"]) +
         '</div>' +
       '</div>',
       'branch') +
@@ -493,7 +552,7 @@ function remarketingView(){
       pathStep("Ask for Confirmation","After repeating the details, ask the client to confirm.") +
       pathStep("If the Information Is Correct","Proceed to clearly explain the delivery terms.") +
       pathStep("If the Information Is Incorrect","Ask which part is incorrect, clarify the correct details, and confirm the updated information before proceeding.") +
-      '<div class="script">"So before we proceed with your order, let me clarify all the information first to make sure everything is correct."<br>"You bought (QUANTITY) bottle(s) of (PRODUCT NAME)."<br>"The price is (PRICE), the delivery fee is (DELIVERY FEE), so the total amount is (TOTAL PRICE)."<br>"It will be delivered to (CLIENT’S ADDRESS), and the estimated delivery time to your area is (DELIVERY TIME)."<br>"Your name is (CLIENT’S NAME), and your email address is (EMAIL)."<br>"Are all my informations correct?"</div>' +
+      '<div class="script">"So before we proceed with your order, let me clarify all the information first to make sure everything is correct."<br>"You bought (QUANTITY) bottle(s) of (PRODUCT NAME)."<br>"The price is (PRICE), the delivery fee is (DELIVERY FEE), so the total amount is (TOTAL PRICE)."<br>"It will be delivered to (CLIENTâ€™S ADDRESS), and the estimated delivery time to your area is (DELIVERY TIME)."<br>"Your name is (CLIENTâ€™S NAME), and your email address is (EMAIL)."<br>"Are all my informations correct?"</div>' +
       '<p>If yes: <em>"Thank you for confirming. Let me now explain the delivery terms clearly."</em><br>If no: <em>"Thank you for letting me know. May I ask which part is incorrect so I can correct it?"</em></p>',
       'close') +
   '</div>';
@@ -508,23 +567,104 @@ function notOrderedView(){
     '<div class="stagejump">'+jump+'</div>' +
     stage(1,"Greeting & reason for the call",
       '<p>Reconnect and explain the reason for the call without assuming or accusing the customer of placing the order.</p>' +
-      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME) from (COMPANY). We’re reaching out about a recent request recorded under your name for (PRODUCT NAME). May I quickly confirm if you’re familiar with this?"</div>',
+      '<div class="script">"Hi (CLIENT NAME), this is (AGENT NAME) from (COMPANY). Weâ€™re reaching out about a recent request recorded under your name for (PRODUCT NAME). May I quickly confirm if youâ€™re familiar with this?"</div>',
       'no-greet') +
     stage(2,"Acknowledge, then clarify",
-      '<p>If the customer says they didn’t order, don’t argue. Instead verify gently: does the product/date sound familiar, did they or a household member sign up or inquire online, and do they currently have a related concern?</p>',
+      '<p>If the customer says they didnâ€™t order, donâ€™t argue. Instead verify gently: does the product/date sound familiar, did they or a household member sign up or inquire online, and do they currently have a related concern?</p>',
       'no-verify') +
     stage(3,"Identify the real reason",
       '<div class="pathgrid">' +
         '<div class="pathcard"><h4>Changed mind</h4>Understand and address the concern if appropriate.</div>' +
-        '<div class="pathcard"><h4>No money</h4>Offer a callback — maximum one attempt.</div>' +
+        '<div class="pathcard"><h4>No money</h4>Offer a callback â€” maximum one attempt.</div>' +
         '<div class="pathcard"><h4>Not the decision-maker</h4>Identify the real decision-maker; if a need exists, create a referral order and attempt to close, or hand off to RT/Retention if unavailable.</div>' +
         '<div class="pathcard"><h4>Genuine unrecognized order</h4>Respect the response and close professionally.</div>' +
       '</div>',
       'no-reason') +
     stage(4,"Sales opportunity",
       '<p>If the customer is the decision-maker and a real need exists, present <strong>5 pcs and 3 pcs</strong> together as the primary offer. If they push back on price or quantity, drop to <strong>2 pcs and 1 pc</strong>.</p>' +
-      '<p><strong>Offer ladder:</strong> 7/10 pcs (upsell) → 5/3 pcs (primary) → 2/1 pc (budget recovery). Never argue that the customer ordered — the goal is finding the real reason and any legitimate opportunity.</p>',
+      '<p><strong>Offer ladder:</strong> 7/10 pcs (upsell) â†’ 5/3 pcs (primary) â†’ 2/1 pc (budget recovery). Never argue that the customer ordered â€” the goal is finding the real reason and any legitimate opportunity.</p>',
       'no-offer') +
+  '</div>';
+}
+
+function redeliveryAlgoView(){
+  var jump = ['rd-prep','rd-open','rd-reconfirm','rd-objections','rd-close','rd-cross','rd-callback','rd-referral'].map(function(id,i){
+    var labels=['1. Preparation','2. Opening','3. Offer reconfirmation','4. Objections','5. Summing up','6. Cross-sell','7. Callback protocol','8. Referral / recommendation'];
+    return '<a href="#'+id+'">'+labels[i]+'</a>';
+  }).join("");
+  return '<div class="card">' +
+    '<div class="stagejump">'+jump+'</div>' +
+    stage(1,"Preparation",
+      pathStep("Check the CRM Live While Greeting","Review product, quantity, and order date; last call notes; delivery status; and province/city coverage â€” in real time as the call connects.") +
+      pathStep("Know the Gift and Promo","Understand this week's promo ladder (standard vs. 40% off), the matching cross-sell options, and the current gift offering before you dial.") +
+      '<div class="script">Read the account the instant the call connects â€” a few seconds now avoids a cold, awkward open.</div>',
+      'rd-prep') +
+    stage(2,"Opening: no blame, no early price",
+      '<p>The first 15 seconds decide whether the client wants to reconfirm or redeliver.</p>' +
+      pathStep("Step 1 â€” Warm Greeting","Use their name, smile audibly, sound friendly.") +
+      '<div class="script">"Magandang araw po! Si [name] po ito from [brand] Customer Care. Kausap ko po ba si Maâ€™am/Sir [name]?"</div>' +
+      pathStep("Step 2 â€” Why You're Calling","Tie the call to the client's own order history.") +
+      '<div class="script">"Bumalik po kasi sa amin yung parcel niyo. Gusto ko lang po malaman kung anoâ€™ng nangyari."</div>' +
+      pathStep("Step 3 â€” Ask Permission","Redirect blame toward logistics, not the client.") +
+      '<div class="script">"Hindi po kayo natawagan ng rider, o hindi po kayo naabutan sa bahay?"</div>' +
+      '<div class="script">Never skip the warmth. It will be hard for clients to warm up to us if we start with a low-energy, robotic approach.</div>',
+      'rd-open') +
+    stage(3,"Offer reconfirmation",
+      '<p>State the amount once and in full here â€” not earlier. Always disclose the COD process audibly.</p>' +
+      '<div class="script">"Ipadeliver na lang po ulit yung order niyo. Kung sakali po, ito po ung ating [product], [quantity], [amount] pesos po at Cash on Delivery po ito. Saka pa lang po tayo magbabayad kapag dumating na ang rider sa bahay niyo at hindi pa po ngayon."</div>',
+      'rd-reconfirm') +
+    stage(4,"Objections",
+      '<p>If the client declines, work through all three cycles before ever considering a discount. There is no fourth cycle.</p>' +
+      pathStep("Cycle 1 â€” Accept and Return the Benefit","Acknowledge the client, then restate that nothing is paid until the rider arrives.") +
+      '<div class="script">"Naiintindihan ko po kayo. Pero wala pong bayad ngayon, pag dumating lang po sa inyo, saka pa lang po tayo magbabayad sa rider."</div>' +
+      pathStep("Cycle 2 â€” Narrow to Logistics","Shift the objection toward scheduling rather than the purchase itself.") +
+      '<div class="script">"Kayo po madalas nasa bahay? Kung magkataon man po na wala kayo sa bahay sa oras ng pagdeliver, basta po may ibang pwedeng magreceive at nasa kanya ang pera, pwede niya pong tanggapin ang delivery."</div>' +
+      pathStep("Cycle 3 â€” Reduce Volume, One Step Only","Offer a single, smaller step down in quantity â€” never more than one reduction.") +
+      '<div class="script">"Sige po, kunin niyo na lang po muna ang ating [smaller quantity] box para mas magaan."</div>' +
+      pathStep("After Three Cycles","Offer a 40% discount if eligible, or schedule a callback within 14 days.") +
+      offerBox(["Discount eligible only if ALL are true: the objection is price only (not time/family/distrust)","All three cycles were already completed","The original order came from a retention or remarketing flow","Orders from sales flows, or from retention/remarketing without an original discount, stay at regular price"]),
+      'rd-objections') +
+    stage(5,"Summing up",
+      pathStep("Confirm the Full Summary","Product, quantity, final total, COD, address, and landmark.") +
+      pathStep("Confirm Address","Complete address with landmark, plus email.") +
+      pathStep("Confirm Name","Complete name.") +
+      pathStep("Confirm Terms","Delivery terms and the amount to prepare.") +
+      pathStep("Gift Announcement (after the client says yes)","") +
+      '<div class="script">"May kasama pong maliit na regalo galing sa amin, hindi po ito bayad, thank you lang po sa tiwala. Ibibigay po ng rider kasabay ng order."</div>' +
+      pathStep("Unknown-Caller Warning","") +
+      '<div class="script">"Pag may tumawag po na hindi kilalang number, pasagot na lang po dahil kalimitan, rider po namin iyon."</div>' +
+      pathStep("CRM Note Requirement","Log the real reason the first delivery failed, so it isnâ€™t repeated.") +
+      '<div class="pathgrid">' +
+        '<div class="pathcard"><h4>Gift presentation â€” do</h4>' +
+          '<div class="step">Say it once, at the very end.</div>' +
+          '<div class="step">Tie it to the clientâ€™s action (confirmed address + email).</div>' +
+          '<div class="step">Frame it as already inside the parcel.</div>' +
+          '<div class="step">Log it in the CRM â€” one gift per customer.</div>' +
+        '</div>' +
+        '<div class="pathcard"><h4>Gift presentation â€” never</h4>' +
+          '<div class="step">Mention it before the client says yes (that is bait).</div>' +
+          '<div class="step">Offer it as an answer to an objection (teaches resistance pays).</div>' +
+          '<div class="step">Name its price or use the word "worth".</div>' +
+          '<div class="step">Mention it in the same sentence as a discount.</div>' +
+          '<div class="step">Use the words: <em>libre, promo, discount, bonus, palit</em> anywhere near it â€” they shift focus to money.</div>' +
+        '</div>' +
+      '</div>',
+      'rd-close') +
+    stage(6,"Cross-sell",
+      '<p>Cross-sell only if the client agreed immediately at Step 3 (Offer Reconfirmation) and the close was easy. If all three objection cycles were used, or the client refused the first offer, skip cross-sell entirely and move straight to Summing Up.</p>',
+      'rd-cross') +
+    stage(7,"Callback protocol",
+      pathStep("When to Set a Callback","Client is busy, not around, or has no money right now.") +
+      pathStep("Max Hold Duration","Busy / not around: 24 hours only. No money: maximum 14 days, one time in a row. Always give a specific date and time.") +
+      '<div class="script">"Naiintindihan ko po. Ang promo po namin, maximum 14 days lang po naming ma-hold. Pwede po ba tawagan kita sa [Day], [Date]? ... Sige po, salamat sa oras niyo. Ingat po kayo, God bless!"</div>' +
+      pathStep("CRM Action","Set status to â€œCall Later.â€ Write clear notes: what was discussed, what the customer said, and what to offer next time."),
+      'rd-callback') +
+    stage(8,"Referral / recommendation",
+      pathStep("When to Use Referral","The client is not the product user themself â€” ask if a relative, friend, or acquaintance has a similar concern.") +
+      pathStep("When to Use Recommendation","Always attempt before the call ends.") +
+      '<div class="script">"Sir/Maâ€™am, matanong ko na lang rin po, may mga kakilala, kamag-anak, o kaibigan po ba kayo na may nararamdaman ding ganito sa kanilang katawan? Maaari po namin silang tawagan para matulungan din po namin sila."</div>' +
+      '<p>Then proceed to information gathering and follow the standard Referral Rules and Guidelines.</p>',
+      'rd-referral') +
   '</div>';
 }
 
@@ -533,15 +673,16 @@ function renderApp(state){
   var s = SECTIONS[active];
   var viewHtml = {
     ranking: rankingView, performance: performanceView, shifts: shiftsView,
-    remarketing: remarketingView, notordered: notOrderedView, gifts: giftsView,
-    redelivery: redeliveryView, callbacks: callbacksView
+    leaveTracker: leaveTrackerView,
+    remarketing: remarketingView, notordered: notOrderedView, redeliveryAlgo: redeliveryAlgoView,
+    gifts: giftsView, redelivery: redeliveryView, callbacks: callbacksView
   }[active]();
 
   return '' +
-  '<div class="mobilebar"><button id="navtoggle" aria-label="Open menu">☰</button><strong>'+esc(SECTIONS[active].title)+'</strong></div>' +
+  '<div class="mobilebar"><button id="navtoggle" aria-label="Open menu">â˜°</button><strong>'+esc(SECTIONS[active].title)+'</strong></div>' +
   '<div class="scrim" id="scrim"></div>' +
   '<aside class="side" id="sidenav">' +
-    '<div class="brand"><div class="mark">☎️</div><div class="txt"><strong>Confirmation Desk</strong><span>Team ops hub</span></div></div>' +
+    '<div class="brand"><div class="mark">â˜Žï¸</div><div class="txt"><strong>Confirmation Desk</strong><span>Team ops hub</span></div></div>' +
     '<nav>'+renderNav(active, SECTIONS)+'</nav>' +
   '</aside>' +
   '<main class="main">' +
@@ -587,12 +728,39 @@ function attachHandlers(){
       var submitBtn = document.getElementById('f-submit');
       var msg = document.getElementById('f-msg');
       submitBtn.disabled = true;
-      msg.textContent = 'Adding…';
+      msg.textContent = 'Addingâ€¦';
       msg.className = 'savemsg';
       setTimeout(function(){
         setActive('shifts');
         var m = document.getElementById('f-msg');
-        if (m){ m.textContent = 'Added to this list on your device. Note: this file isn’t connected to a shared server, so this addition stays local to your browser — send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
+        if (m){ m.textContent = 'Added to this list on your device. Note: this file isnâ€™t connected to a shared server, so this addition stays local to your browser â€” send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
+      }, 200);
+    });
+  }
+  var leaveForm = document.getElementById('leaveform');
+  if (leaveForm){
+    leaveForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      var name = document.getElementById('l-name').value.trim();
+      var reason = document.getElementById('l-reason').value.trim();
+      if (!name || !reason) return;
+      var entry = {
+        name: name,
+        start: document.getElementById('l-start').value.trim(),
+        end: document.getElementById('l-end').value.trim(),
+        reason: reason,
+        added: true
+      };
+      LEAVE_STATE.leaveRequests.push(entry);
+      var submitBtn = document.getElementById('l-submit');
+      var msg = document.getElementById('l-msg');
+      submitBtn.disabled = true;
+      msg.textContent = 'Addingâ€¦';
+      msg.className = 'savemsg';
+      setTimeout(function(){
+        setActive('leaveTracker');
+        var m = document.getElementById('l-msg');
+        if (m){ m.textContent = 'Added to this list on your device. Note: this file isnâ€™t connected to a shared server, so this addition stays local to your browser â€” send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
       }, 200);
     });
   }
