@@ -10,9 +10,16 @@
  * number or row number. If a label can't be found, or a block comes back
  * empty, the script throws and exits non-zero WITHOUT touching index.html —
  * so a spreadsheet reorganization fails the GitHub Action run loudly instead
- * of silently publishing wrong data. On failure it also prints a preview of
- * the row it was looking at, so the fix is visible straight from the Action
- * log without needing to dig through the sheet by hand.
+ * of silently publishing wrong data.
+ *
+ * Resilience: Google's gviz CSV endpoint has occasionally returned a
+ * different sheet's data for a name-based request (a caching/lookup quirk,
+ * not something this script can prevent) — so every fetch is validated
+ * against the labels it expects, and retried a couple of times with a
+ * cache-busting param before giving up. And instead of stopping at the
+ * FIRST problem, every block is checked and every problem found is reported
+ * together in one error, so one run — and one round of fixes — can surface
+ * everything that needs attention instead of one thing at a time.
  */
 
 import { readFileSync, writeFileSync } from "fs";
@@ -20,8 +27,11 @@ import { readFileSync, writeFileSync } from "fs";
 const SHEET_ID = "1NyWkYctFgVEX1q5v_v-XWqPfuw5YhylMfkA6sIfSvoA";
 const FILE = "index.html";
 
-async function fetchSheetCsv(sheetName) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}`;
+function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
+
+async function fetchSheetCsv(sheetName, bust) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&sheet=${encodeURIComponent(sheetName)}` +
+    (bust ? `&_=${bust}` : "");
   const res = await fetch(url);
   if (!res.ok) throw new Error(`Fetch failed for sheet "${sheetName}": HTTP ${res.status}`);
   const text = await res.text();
@@ -89,11 +99,10 @@ function requireCol(headerRow, label, opts, sheetLabel) {
 }
 
 // The sheet may have a title/banner row above the real header row, a leading
-// blank row, or (as it turns out for "Rules and Shift Request") a second
-// table stacked well below the first one with its own header row further
-// down — so scan from `from` through the whole sheet for a row that
-// contains ALL of the given labels, rather than assuming row 0 is it or
-// that every block shares one header row.
+// blank row, or a second table stacked well below the first one with its
+// own header row further down — so scan from `from` through the whole
+// sheet for a row that contains ALL of the given labels, rather than
+// assuming row 0 is it or that every block shares one header row.
 function locateHeaderRow(rows, labels, sheetLabel, { from = 0 } = {}) {
   for (let r = from; r < rows.length; r++) {
     const ok = labels.every(l => findCol(rows[r], l, { mode: "contains" }) !== -1);
@@ -107,14 +116,35 @@ function locateHeaderRow(rows, labels, sheetLabel, { from = 0 } = {}) {
   );
 }
 
+// Fetches a sheet and confirms it actually contains the labels we expect
+// before trusting it — Google's gviz endpoint has, on occasion, returned a
+// different sheet's data for a name-based request. Retries with a fresh,
+// cache-busted request a couple of times before giving up, since that kind
+// of mismatch has so far looked transient rather than a real rename.
+async function getValidatedSheet(sheetName, requiredLabels, sheetLabel, attempts = 3) {
+  let lastErr;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const rows = await fetchSheetCsv(sheetName, attempt > 1 ? `${Date.now()}-${attempt}` : undefined);
+      const headerRowIdx = locateHeaderRow(rows, requiredLabels, sheetLabel);
+      return { rows, headerRowIdx };
+    } catch (err) {
+      lastErr = err;
+      if (attempt < attempts) await sleep(1200);
+    }
+  }
+  throw lastErr;
+}
+
 function esc(s) { return String(s == null ? "" : s).trim(); }
 function jstr(s) { return JSON.stringify(esc(s)); }
 
 // ---------- Ranking / Score ----------
 async function buildRanking() {
-  const rows = await fetchSheetCsv("Ranking/Score");
   const sheetLabel = "Ranking/Score";
-  const headerRowIdx = locateHeaderRow(rows, ["AGENT NAME", "Weekly Score", "TOTAL SCORE", "Ranking"], sheetLabel);
+  const { rows, headerRowIdx } = await getValidatedSheet(
+    "Ranking/Score", ["AGENT NAME", "Weekly Score", "TOTAL SCORE", "Ranking"], sheetLabel
+  );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "AGENT NAME", {}, sheetLabel);
   const scoreCol = requireCol(header, "Weekly Score", {}, sheetLabel);
@@ -143,9 +173,10 @@ async function buildRanking() {
 
 // ---------- Performance Update ----------
 async function buildPerf(existingAugustLiteral) {
-  const rows = await fetchSheetCsv("Performance Update");
   const sheetLabel = "Performance Update";
-  const headerRowIdx = locateHeaderRow(rows, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled"], sheetLabel);
+  const { rows, headerRowIdx } = await getValidatedSheet(
+    "Performance Update", ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled"], sheetLabel
+  );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
   const curCol = requireCol(header, "Current MTD", { mode: "contains" }, sheetLabel);
@@ -188,14 +219,15 @@ async function buildPerf(existingAugustLiteral) {
 
 // ---------- Rules and Shift Request (schedule + off-requests) ----------
 async function buildScheduleAndOffRequests() {
-  const rows = await fetchSheetCsv("Rules and Shift Request");
   const sheetLabel = "Rules and Shift Request";
 
   // The schedule table and the off-request table turn out to be stacked
   // (the off-request header is a separate row further down the sheet, not
   // side-by-side with the schedule header) — so each gets its own
   // independent header search rather than assuming they share one row.
-  const scheduleHeaderIdx = locateHeaderRow(rows, ["Agent", "Mon"], sheetLabel);
+  const { rows, headerRowIdx: scheduleHeaderIdx } = await getValidatedSheet(
+    "Rules and Shift Request", ["Agent", "Mon"], sheetLabel
+  );
   const header = rows[scheduleHeaderIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
   const monCol = requireCol(header, "Mon", {}, sheetLabel);
@@ -255,9 +287,10 @@ async function buildScheduleAndOffRequests() {
 
 // ---------- Free Gift Table ----------
 async function buildGifts() {
-  const rows = await fetchSheetCsv("Free Gift Table");
   const sheetLabel = "Free Gift Table";
-  const headerRowIdx = locateHeaderRow(rows, ["Product", "Male Gift", "Female Gift"], sheetLabel);
+  const { rows, headerRowIdx } = await getValidatedSheet(
+    "Free Gift Table", ["Product", "Male Gift", "Female Gift"], sheetLabel
+  );
   const header = rows[headerRowIdx];
   const productCol = requireCol(header, "Product", {}, sheetLabel);
   const maleCol = requireCol(header, "Male Gift", {}, sheetLabel);
@@ -299,12 +332,29 @@ async function main() {
   if (!augustMatch) throw new Error("Could not find existing 'august' block in PERF to preserve it.");
   const existingAugustLiteral = augustMatch[1];
 
-  const [rankingLiteral, perfLiteral, giftsLiteral, scheduleAndOff] = await Promise.all([
-    buildRanking(),
-    buildPerf(existingAugustLiteral),
-    buildGifts(),
-    buildScheduleAndOffRequests(),
-  ]);
+  // Run every block and collect ALL problems in one pass (rather than
+  // stopping at the first), so a single run — and a single round of fixes —
+  // can surface everything that needs attention at once.
+  const jobs = [
+    { name: "Ranking", run: () => buildRanking() },
+    { name: "Performance", run: () => buildPerf(existingAugustLiteral) },
+    { name: "Free Gift table", run: () => buildGifts() },
+    { name: "Shift schedule / day-off requests", run: () => buildScheduleAndOffRequests() },
+  ];
+  const results = await Promise.allSettled(jobs.map(j => j.run()));
+
+  const failures = results
+    .map((r, i) => ({ r, name: jobs[i].name }))
+    .filter(x => x.r.status === "rejected");
+
+  if (failures.length) {
+    const summary = failures
+      .map(f => `— ${f.name}: ${f.r.reason && f.r.reason.message ? f.r.reason.message : f.r.reason}`)
+      .join("\n");
+    throw new Error(`${failures.length} of ${jobs.length} block(s) failed to refresh:\n${summary}`);
+  }
+
+  const [rankingLiteral, perfLiteral, giftsLiteral, scheduleAndOff] = results.map(r => r.value);
 
   html = replaceBlock(html, "RANKING", rankingLiteral);
   html = replaceBlock(html, "PERF", perfLiteral);
