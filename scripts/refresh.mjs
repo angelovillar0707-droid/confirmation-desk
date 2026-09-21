@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
- * Refreshes index.html's live-data blocks (Ranking, Performance, Shift schedule,
- * Day-off requests, Free Gift table) straight from the Google Sheet, and leaves
- * everything else (Redelivery reasons, Manual Callbacks, the two playbook
- * scripts, all styling/markup) untouched.
+ * Refreshes index.html's live-data blocks (Ranking, Performance,
+ * Day-off requests, Free Gift and Pricing) straight from the Google Sheet,
+ * and leaves everything else (Redelivery reasons, Manual Callbacks, the two
+ * playbook scripts, all styling/markup) untouched.
  *
  * Safety model: every value this script needs is located by searching the
  * sheet's own header text for a known label, never by a hardcoded column
@@ -12,20 +12,31 @@
  * so a spreadsheet reorganization fails the GitHub Action run loudly instead
  * of silently publishing wrong data.
  *
- * Resilience: Google's gviz CSV endpoint has occasionally returned a
- * different sheet's data for a name-based request (a caching/lookup quirk,
- * not something this script can prevent) — so every fetch is validated
- * against the labels it expects, and retried a couple of times with a
- * cache-busting param before giving up. And instead of stopping at the
- * FIRST problem, every block is checked and every problem found is reported
- * together in one error, so one run — and one round of fixes — can surface
- * everything that needs attention instead of one thing at a time.
+ * Ranking, Performance, and Free Gift and Pricing are fetched by their tab's
+ * numeric gid rather than its name, so a future rename (like the one that
+ * turned "Free Gift Table" into "Free Gift and Pricing") won't break the
+ * fetch. Day-off requests come from a block inside the Ranking/Score tab
+ * (the old standalone "Rules and Shift Request" tab was removed), located at
+ * run time by its "Off 1" header rather than a fixed position.
+ *
+ * Resilience: every fetch is validated against the labels it expects, and
+ * retried a couple of times with a cache-busting param before giving up.
+ * And instead of stopping at the FIRST problem, every block is checked and
+ * every problem found is reported together in one error, so one run — and
+ * one round of fixes — can surface everything that needs attention instead
+ * of one thing at a time.
  */
 
 import { readFileSync, writeFileSync } from "fs";
 
 const SHEET_ID = "1NyWkYctFgVEX1q5v_v-XWqPfuw5YhylMfkA6sIfSvoA";
 const FILE = "index.html";
+
+// Tab gids — stable across renames, unlike a tab's name (the Free Gift tab
+// has already been renamed once). Prefer these over name-based lookups.
+const GID_RANKING = "945544049"; // Ranking/Score
+const GID_PERF = "773896381";    // Performance update
+const GID_GIFTS = "1249939057";  // Free Gift and Pricing (formerly "Free Gift Table")
 
 function sleep(ms) { return new Promise(res => setTimeout(res, ms)); }
 
@@ -136,14 +147,43 @@ async function getValidatedSheet(sheetName, requiredLabels, sheetLabel, attempts
   throw lastErr;
 }
 
+// Fetches a tab by its numeric gid rather than its name. A gid never changes
+// even when someone renames the tab (which has already happened once to the
+// Free Gift table), so this is the preferred lookup for any sheet whose gid
+// we know.
+async function fetchSheetCsvByGid(gid, bust) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}` +
+    (bust ? `&_=${bust}` : "");
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Fetch failed for gid ${gid}: HTTP ${res.status}`);
+  const text = await res.text();
+  if (!text || text.length < 5) throw new Error(`Sheet gid ${gid} came back empty`);
+  return parseCsv(text);
+}
+
+async function getValidatedSheetByGid(gid, requiredLabels, sheetLabel, attempts = 3) {
+  let lastErr;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const rows = await fetchSheetCsvByGid(gid, attempt > 1 ? `${Date.now()}-${attempt}` : undefined);
+      const headerRowIdx = locateHeaderRow(rows, requiredLabels, sheetLabel);
+      return { rows, headerRowIdx };
+    } catch (err) {
+      lastErr = err;
+      if (attempt < attempts) await sleep(1200);
+    }
+  }
+  throw lastErr;
+}
+
 function esc(s) { return String(s == null ? "" : s).trim(); }
 function jstr(s) { return JSON.stringify(esc(s)); }
 
 // ---------- Ranking / Score ----------
 async function buildRanking() {
   const sheetLabel = "Ranking/Score";
-  const { rows, headerRowIdx } = await getValidatedSheet(
-    "Ranking/Score", ["AGENT NAME", "Weekly Score", "TOTAL SCORE", "Ranking"], sheetLabel
+  const { rows, headerRowIdx } = await getValidatedSheetByGid(
+    GID_RANKING, ["AGENT NAME", "Weekly Score", "TOTAL SCORE", "Ranking"], sheetLabel
   );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "AGENT NAME", {}, sheetLabel);
@@ -174,8 +214,8 @@ async function buildRanking() {
 // ---------- Performance Update ----------
 async function buildPerf(existingAugustLiteral) {
   const sheetLabel = "Performance Update";
-  const { rows, headerRowIdx } = await getValidatedSheet(
-    "Performance Update", ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled"], sheetLabel
+  const { rows, headerRowIdx } = await getValidatedSheetByGid(
+    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled"], sheetLabel
   );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
@@ -217,48 +257,28 @@ async function buildPerf(existingAugustLiteral) {
   return `var PERF = {\n  rows:[\n${rowsBody}\n  ],\n  total:${totalBody},\n  august:${existingAugustLiteral}\n};`;
 }
 
-// ---------- Rules and Shift Request (schedule + off-requests) ----------
-async function buildScheduleAndOffRequests() {
-  const sheetLabel = "Rules and Shift Request";
-
-  // The schedule table and the off-request table turn out to be stacked
-  // (the off-request header is a separate row further down the sheet, not
-  // side-by-side with the schedule header) — so each gets its own
-  // independent header search rather than assuming they share one row.
-  const { rows, headerRowIdx: scheduleHeaderIdx } = await getValidatedSheet(
-    "Rules and Shift Request", ["Agent", "Mon"], sheetLabel
-  );
-  const header = rows[scheduleHeaderIdx];
-  const agentCol = requireCol(header, "Agent", {}, sheetLabel);
-  const monCol = requireCol(header, "Mon", {}, sheetLabel);
-  const dayCols = [monCol, monCol + 1, monCol + 2, monCol + 3, monCol + 4, monCol + 5, monCol + 6];
-  const rowNumCol = agentCol - 1; // sequential 1,2,3.. counter just before the Agent column
-
-  const schedule = [];
-  for (let i = scheduleHeaderIdx + 1; i < rows.length; i++) {
-    const r = rows[i];
-    const seq = esc(r[rowNumCol]);
-    if (!/^[0-9]+$/.test(seq)) { if (schedule.length) break; else continue; }
-    const agent = esc(r[agentCol]) || "—";
-    const days = dayCols.map(c => esc(r[c]));
-    schedule.push({ agent, days });
-  }
-  if (schedule.length < 5) throw new Error(`${sheetLabel}: fewer than 5 schedule rows parsed — refusing to publish.`);
-
-  const offHeaderIdx = locateHeaderRow(rows, ["Off 1"], sheetLabel, { from: scheduleHeaderIdx + 1 });
-  const offHeader = rows[offHeaderIdx];
-  const off1Col = requireCol(offHeader, "Off 1", {}, sheetLabel);
+// ---------- Day-off requests (now a block within Ranking/Score) ----------
+// The old "Rules and Shift Request" tab (which used to hold the shift
+// schedule and this day-off sign-up list) has been deleted from the sheet.
+// The day-off sign-up list survives as a 5-column block — Name, Off 1,
+// Off 2, Shift, Reason — living somewhere inside the Ranking/Score tab.
+// Its exact row/column position has proven unreliable to pin down by
+// inspection, so — as with the old stacked off-request table — this scans
+// the whole sheet at run time for a row containing "Off 1" rather than
+// trusting a hardcoded position.
+async function buildDayOffRequests() {
+  const sheetLabel = "Ranking/Score (day-off block)";
+  const { rows, headerRowIdx } = await getValidatedSheetByGid(GID_RANKING, ["Off 1"], sheetLabel);
+  const header = rows[headerRowIdx];
+  const off1Col = requireCol(header, "Off 1", {}, sheetLabel);
   const nameCol = off1Col - 1;
   const off2Col = off1Col + 1;
   const shiftCol = off1Col + 2;
   const reasonCol = off1Col + 3;
-  const offRowNumCol = nameCol - 1;
 
   const offRequests = [];
-  for (let i = offHeaderIdx + 1; i < rows.length; i++) {
+  for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
-    const seq = esc(r[offRowNumCol]);
-    if (!/^[0-9]+$/.test(seq)) continue;
     const name = esc(r[nameCol]);
     if (!name) continue;
     offRequests.push({
@@ -269,27 +289,20 @@ async function buildScheduleAndOffRequests() {
       reason: esc(r[reasonCol]),
     });
   }
-  // Off-requests are allowed to legitimately be empty (nobody asked this week),
-  // so no minimum-count guard here — unlike the other blocks, zero is valid.
+  // Day-off requests are allowed to legitimately be empty (nobody asked this
+  // week), so no minimum-count guard here — unlike the other blocks, zero is valid.
 
-  const scheduleBody = schedule
-    .map(s => `  {agent:${jstr(s.agent)},days:[${s.days.map(jstr).join(",")}]}`)
-    .join(",\n");
-  const scheduleLiteral = `var SCHEDULE = [\n${scheduleBody}\n];`;
-
-  const offBody = offRequests
+  const body = offRequests
     .map(o => `{"name":${jstr(o.name)},"off1":${jstr(o.off1)},"off2":${jstr(o.off2)},"shift":${jstr(o.shift)},"reason":${jstr(o.reason)},"added":false}`)
     .join(",");
-  const stateLiteral = `var STATE = {"offRequests":[${offBody}]};`;
-
-  return { scheduleLiteral, stateLiteral };
+  return `var DAYOFF_STATE = {"dayOffRequests":[${body}]};`;
 }
 
-// ---------- Free Gift Table ----------
+// ---------- Free Gift and Pricing (formerly "Free Gift Table") ----------
 async function buildGifts() {
-  const sheetLabel = "Free Gift Table";
-  const { rows, headerRowIdx } = await getValidatedSheet(
-    "Free Gift Table", ["Product", "Male Gift", "Female Gift"], sheetLabel
+  const sheetLabel = "Free Gift and Pricing";
+  const { rows, headerRowIdx } = await getValidatedSheetByGid(
+    GID_GIFTS, ["Product", "Male Gift", "Female Gift"], sheetLabel
   );
   const header = rows[headerRowIdx];
   const productCol = requireCol(header, "Product", {}, sheetLabel);
@@ -339,7 +352,7 @@ async function main() {
     { name: "Ranking", run: () => buildRanking() },
     { name: "Performance", run: () => buildPerf(existingAugustLiteral) },
     { name: "Free Gift table", run: () => buildGifts() },
-    { name: "Shift schedule / day-off requests", run: () => buildScheduleAndOffRequests() },
+    { name: "Day-off requests", run: () => buildDayOffRequests() },
   ];
   const results = await Promise.allSettled(jobs.map(j => j.run()));
 
@@ -354,13 +367,12 @@ async function main() {
     throw new Error(`${failures.length} of ${jobs.length} block(s) failed to refresh:\n${summary}`);
   }
 
-  const [rankingLiteral, perfLiteral, giftsLiteral, scheduleAndOff] = results.map(r => r.value);
+  const [rankingLiteral, perfLiteral, giftsLiteral, dayOffLiteral] = results.map(r => r.value);
 
   html = replaceBlock(html, "RANKING", rankingLiteral);
   html = replaceBlock(html, "PERF", perfLiteral);
   html = replaceBlock(html, "GIFTS", giftsLiteral);
-  html = replaceBlock(html, "SCHEDULE", scheduleAndOff.scheduleLiteral);
-  html = replaceBlock(html, "STATE", scheduleAndOff.stateLiteral);
+  html = replaceBlock(html, "DAYOFF", dayOffLiteral);
 
   writeFileSync(FILE, html, "utf8");
   console.log("index.html refreshed successfully from the Google Sheet.");
