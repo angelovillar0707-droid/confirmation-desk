@@ -416,12 +416,46 @@ async function buildPricing() {
   const discCol = requireCol(header, "Discounted Price", { mode: "contains" }, sheetLabel);
   const shipCol = requireCol(header, "Shipping Fee", { mode: "contains" }, sheetLabel);
 
+  // The pricing block is not one contiguous list - it is several stacked
+  // tier tables (an unlabeled main section, then sections introduced by a
+  // text-only label row such as "SECOND MAIN PRODUCT" or "CROSS SALE"),
+  // separated by blank rows. Classify each row instead of assuming a single
+  // flat list, and stop after a run of blank rows so a parsing mistake
+  // can't scan unboundedly into unrelated content further down the sheet.
+  const DEFAULT_SECTION = "Main Product";
+  const MAX_CONSECUTIVE_BLANKS = 3;
+
   const entries = [];
+  let section = DEFAULT_SECTION;
+  let blankRun = 0;
+
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const tier = esc(r[tierCol]);
-    if (!tier) break; // contiguous tier list ends at the first blank cell
-    entries.push([tier, esc(r[origCol]), esc(r[discCol]), esc(r[shipCol])]);
+    const orig = esc(r[origCol]);
+    const disc = esc(r[discCol]);
+    const ship = esc(r[shipCol]);
+
+    const hasTier = tier !== "";
+    const hasPrice = orig !== "" || disc !== "";
+
+    if (!hasTier && !hasPrice && ship === "") {
+      blankRun++;
+      if (blankRun >= MAX_CONSECUTIVE_BLANKS) break;
+      continue;
+    }
+    blankRun = 0;
+
+    if (hasTier && !hasPrice) {
+      // Text-only row (e.g. "SECOND MAIN PRODUCT", "CROSS SALE") - a new
+      // section label, not a priced tier.
+      section = tier;
+      continue;
+    }
+
+    if (!hasTier) continue; // stray cell with no tier label - skip, don't terminate
+
+    entries.push([section, tier, orig, disc, ship]);
   }
   if (entries.length < 1) throw new Error(`${sheetLabel}: no pricing rows parsed  -  refusing to publish.`);
 
