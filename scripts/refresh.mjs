@@ -304,16 +304,29 @@ async function buildGifts() {
   const { rows, headerRowIdx } = await getValidatedSheetByGid(
     GID_GIFTS, ["Product", "Male Gift", "Female Gift"], sheetLabel
   );
+  // Use "contains" rather than an exact match here: this sheet's header
+  // cells for this table have turned out to hold more than just the plain
+  // label (e.g. "Product" arriving as "Product\nEasy Go Max", collapsed by
+  // norm() to "product easy go max") — the same kind of wrapped/compound
+  // header cell seen elsewhere in this sheet, just matched loosely instead
+  // of assuming the exact text.
   const header = rows[headerRowIdx];
-  const productCol = requireCol(header, "Product", {}, sheetLabel);
-  const maleCol = requireCol(header, "Male Gift", {}, sheetLabel);
-  const femaleCol = requireCol(header, "Female Gift", {}, sheetLabel);
+  const productCol = requireCol(header, "Product", { mode: "contains" }, sheetLabel);
+  const maleCol = requireCol(header, "Male Gift", { mode: "contains" }, sheetLabel);
+  const femaleCol = requireCol(header, "Female Gift", { mode: "contains" }, sheetLabel);
 
   const entries = [];
+  const seen = new Set();
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const product = esc(r[productCol]);
     if (!product) continue;
+    // Guard against the header row's own compound text bleeding a duplicate
+    // of the first product into the data range (belt-and-braces — harmless
+    // if that never actually happens).
+    const key = norm(product) + "|" + norm(r[maleCol]) + "|" + norm(r[femaleCol]);
+    if (seen.has(key)) continue;
+    seen.add(key);
     entries.push([product, esc(r[maleCol]), esc(r[femaleCol])]);
   }
   if (entries.length < 3) throw new Error(`${sheetLabel}: fewer than 3 rows parsed — refusing to publish.`);
