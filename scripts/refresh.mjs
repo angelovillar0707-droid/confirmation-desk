@@ -245,27 +245,69 @@ async function buildPerf(existingAugustLiteral) {
   const callsCol = requireCol(header, "Calls Handled", { mode: "contains", exclude: "previous" }, sheetLabel);
   const convCol = requireCol(header, "Conversion %", { mode: "contains", exclude: "previous" }, sheetLabel);
 
+  // This table has two things above/below the real per-agent rows that
+  // aren't agents: an "August" full-month recap row right at the top (its
+  // numbers are the same full-month figures preserved separately below as
+  // `august`, so it's skipped here rather than listed as an agent), and a
+  // KPI-summary block further down ("Agents Above Previous Pace", "Highest
+  // Improvement", etc., ending in its own unrelated "Total" row that isn't
+  // the real per-agent total). Stop the moment any of those labels shows
+  // up, and compute this table's own Total from the real agent rows
+  // instead of trusting whatever "Total"-labeled row the sheet has.
+  const NON_AGENT_LABELS = [
+    "total", "agents above", "agents below", "metric",
+    "highest improvement", "biggest decline", "months",
+  ];
+
   const agentRows = [];
-  let totalRow = null;
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const agent = esc(r[agentCol]);
-    if (!agent) continue;
-    const rec = {
+    if (!agent) break;
+    const agentNorm = norm(agent);
+    if (agentNorm === "august") continue;
+    if (NON_AGENT_LABELS.some(l => agentNorm.includes(l))) break;
+    agentRows.push({
       a: agent,
       cur: Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0,
       prev: Number(esc(r[prevCol]).replace(/[^0-9.\-]/g, "")) || 0,
       diff: esc(r[diffCol]),
       pct: esc(r[pctCol]),
       avg: esc(r[avgCol]),
+      avgNum: Number(esc(r[avgCol]).replace(/[^0-9.\-]/g, "")) || 0,
       calls: esc(r[callsCol]).replace(/"/g, ""),
+      callsNum: Number(esc(r[callsCol]).replace(/[^0-9.\-]/g, "")) || 0,
       conv: esc(r[convCol]),
-    };
-    if (norm(agent).includes("total")) { totalRow = rec; totalRow.a = "Total"; continue; }
-    agentRows.push(rec);
+    });
   }
   if (agentRows.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid agent rows parsed — refusing to publish.`);
-  if (!totalRow) throw new Error(`${sheetLabel}: no row containing "total" found — refusing to publish.`);
+
+  function fmtDiff(cur, prev) {
+    const d = cur - prev;
+    return (d >= 0 ? "+" : "") + d;
+  }
+  function fmtPct(cur, prev) {
+    if (!prev) return (cur * 100) + "%"; // matches the sheet's own div-by-zero fallback (e.g. 38 -> "3800%")
+    return Math.round(((cur - prev) / prev) * 100) + "%";
+  }
+
+  const totalCur = agentRows.reduce((s, r) => s + r.cur, 0);
+  const totalPrev = agentRows.reduce((s, r) => s + r.prev, 0);
+  const totalCalls = agentRows.reduce((s, r) => s + r.callsNum, 0);
+  // Average check weighted by each agent's confirmed-order volume, and
+  // conversion recomputed the same way the per-agent conversion values
+  // check out (confirmed orders / calls handled) — both real aggregates of
+  // the agents actually in the table, not a stray sheet total.
+  const totalAvg = totalCur ? (agentRows.reduce((s, r) => s + r.avgNum * r.cur, 0) / totalCur) : 0;
+  const totalConv = totalCalls ? Math.round((totalCur / totalCalls) * 100) : 0;
+  const totalRow = {
+    cur: totalCur, prev: totalPrev,
+    diff: fmtDiff(totalCur, totalPrev),
+    pct: fmtPct(totalCur, totalPrev),
+    avg: "₱" + totalAvg.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
+    calls: totalCalls.toLocaleString("en-US"),
+    conv: totalConv + "%",
+  };
 
   const rowsBody = agentRows
     .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},diff:${jstr(r.diff)},pct:${jstr(r.pct)},avg:${jstr(r.avg)},calls:${jstr(r.calls)},conv:${jstr(r.conv)}}`)
