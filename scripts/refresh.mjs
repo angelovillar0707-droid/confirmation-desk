@@ -85,19 +85,22 @@ function requireCol(headerRow, label, opts, sheetLabel) {
   return idx;
 }
 
-// The sheet may have a title/banner row above the real header row (or a
-// leading blank row), so scan the first several rows for the one that
-// contains ALL of the given labels, rather than assuming row 0 is it.
-function locateHeaderRow(rows, labels, sheetLabel, maxScan = 10) {
-  for (let r = 0; r < Math.min(maxScan, rows.length); r++) {
+// The sheet may have a title/banner row above the real header row, a leading
+// blank row, or (as it turns out for "Rules and Shift Request") a second
+// table stacked well below the first one with its own header row further
+// down — so scan from `from` through the whole sheet for a row that
+// contains ALL of the given labels, rather than assuming row 0 is it or
+// that every block shares one header row.
+function locateHeaderRow(rows, labels, sheetLabel, { from = 0 } = {}) {
+  for (let r = from; r < rows.length; r++) {
     const ok = labels.every(l => findCol(rows[r], l, { mode: "contains" }) !== -1);
     if (ok) return r;
   }
   throw new Error(
     `Could not find a header row containing all of [${labels.join(", ")}] ` +
-    `in "${sheetLabel}" within the first ${Math.min(maxScan, rows.length)} rows. ` +
-    `Row 1 looks like: [${previewRow(rows[0])}]` +
-    (rows[1] ? ` — Row 2 looks like: [${previewRow(rows[1])}]` : "")
+    `in "${sheetLabel}" anywhere from row ${from + 1} onward (${rows.length} rows total). ` +
+    `Row ${from + 1} looks like: [${previewRow(rows[from])}]` +
+    (rows[from + 1] ? ` — Row ${from + 2} looks like: [${previewRow(rows[from + 1])}]` : "")
   );
 }
 
@@ -184,15 +187,20 @@ async function buildPerf(existingAugustLiteral) {
 async function buildScheduleAndOffRequests() {
   const rows = await fetchSheetCsv("Rules and Shift Request");
   const sheetLabel = "Rules and Shift Request";
-  const headerRowIdx = locateHeaderRow(rows, ["Agent", "Mon", "Off 1"], sheetLabel);
-  const header = rows[headerRowIdx];
+
+  // The schedule table and the off-request table turn out to be stacked
+  // (the off-request header is a separate row further down the sheet, not
+  // side-by-side with the schedule header) — so each gets its own
+  // independent header search rather than assuming they share one row.
+  const scheduleHeaderIdx = locateHeaderRow(rows, ["Agent", "Mon"], sheetLabel);
+  const header = rows[scheduleHeaderIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
   const monCol = requireCol(header, "Mon", {}, sheetLabel);
   const dayCols = [monCol, monCol + 1, monCol + 2, monCol + 3, monCol + 4, monCol + 5, monCol + 6];
   const rowNumCol = agentCol - 1; // sequential 1,2,3.. counter just before the Agent column
 
   const schedule = [];
-  for (let i = headerRowIdx + 1; i < rows.length; i++) {
+  for (let i = scheduleHeaderIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const seq = esc(r[rowNumCol]);
     if (!/^[0-9]+$/.test(seq)) { if (schedule.length) break; else continue; }
@@ -202,7 +210,9 @@ async function buildScheduleAndOffRequests() {
   }
   if (schedule.length < 5) throw new Error(`${sheetLabel}: fewer than 5 schedule rows parsed — refusing to publish.`);
 
-  const off1Col = requireCol(header, "Off 1", {}, sheetLabel);
+  const offHeaderIdx = locateHeaderRow(rows, ["Off 1"], sheetLabel, { from: scheduleHeaderIdx + 1 });
+  const offHeader = rows[offHeaderIdx];
+  const off1Col = requireCol(offHeader, "Off 1", {}, sheetLabel);
   const nameCol = off1Col - 1;
   const off2Col = off1Col + 1;
   const shiftCol = off1Col + 2;
@@ -210,7 +220,7 @@ async function buildScheduleAndOffRequests() {
   const offRowNumCol = nameCol - 1;
 
   const offRequests = [];
-  for (let i = headerRowIdx + 1; i < rows.length; i++) {
+  for (let i = offHeaderIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const seq = esc(r[offRowNumCol]);
     if (!/^[0-9]+$/.test(seq)) continue;
