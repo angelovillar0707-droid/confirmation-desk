@@ -414,11 +414,25 @@ function leaveTrackerView(){
 
 function giftsView(){
   var rows = GIFTS.map(function(g){return '<tr><td>'+esc(g[0])+'</td><td>'+esc(g[1])+'</td><td>'+esc(g[2])+'</td></tr>';}).join("");
-  var priceRows = PRICING.map(function(p){return '<tr><td>'+esc(p[0])+'</td><td class="num">'+esc(p[1])+'</td><td class="num">'+esc(p[2])+'</td><td class="num">'+esc(p[3])+'</td></tr>';}).join("");
-  var priceCard = PRICING.length ?
-    '<div class="card"><h2>Pricing tiers</h2><div class="sub">Original price, discounted price, and shipping fee by bundle size.</div>' +
-      '<div class="tablewrap"><table class="grid"><thead><tr><th>Pieces / Tier</th><th class="num">Original Price</th><th class="num">Discounted Price</th><th class="num">Shipping Fee</th></tr></thead><tbody>'+priceRows+'</tbody></table></div></div>' :
-    '<div class="card"><h2>Pricing tiers</h2><div class="sub" style="margin-bottom:0">Pricing hasn\u2019t synced from the sheet yet \u2014 it\u2019ll appear here after the next refresh.</div></div>';
+
+  var sections = [];
+  var bySection = {};
+  PRICING.forEach(function(p){
+    var name = p[0];
+    if (!bySection[name]) { bySection[name] = []; sections.push(name); }
+    bySection[name].push(p);
+  });
+  var priceCard;
+  if (sections.length) {
+    var tables = sections.map(function(name){
+      var pr = bySection[name].map(function(p){return '<tr><td>'+esc(p[1])+'</td><td class="num">'+esc(p[2])+'</td><td class="num">'+esc(p[3])+'</td><td class="num">'+esc(p[4])+'</td></tr>';}).join("");
+      return '<h3 style="margin-top:18px;font-size:14px;">'+esc(name)+'</h3>' +
+        '<div class="tablewrap"><table class="grid"><thead><tr><th>Pieces / Tier</th><th class="num">Original Price</th><th class="num">Discounted Price</th><th class="num">Shipping Fee</th></tr></thead><tbody>'+pr+'</tbody></table></div>';
+    }).join("");
+    priceCard = '<div class="card"><h2>Pricing tiers</h2><div class="sub">Original price, discounted price, and shipping fee by bundle size.</div>' + tables + '</div>';
+  } else {
+    priceCard = '<div class="card"><h2>Pricing tiers</h2><div class="sub" style="margin-bottom:0">Pricing hasn\u2019t synced from the sheet yet \u2014 it\u2019ll appear here after the next refresh.</div></div>';
+  }
   return '<div class="card"><h2>Free gift by product</h2><div class="sub">Offer the matching free gift based on the customer\u2019s product and gender.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th>Product</th><th>Male Gift</th><th>Female Gift</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>' +
     priceCard;
