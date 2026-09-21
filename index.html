@@ -138,9 +138,9 @@
 
 <script id="page-script">
 var ACTIVE = "ranking";
-/*AUTO-STATE-START*/
-var STATE = {"offRequests":[{"name":"Raysan Garganta","off1":"Monday","off2":"Tuesday","shift":"Morning","reason":"","added":false},{"name":"Marianne Visda","off1":"Tuesday","off2":"Wednesday","shift":"Morning","reason":"","added":false},{"name":"Karen Dilig","off1":"Wednesday","off2":"Sunday","shift":"Afternoon","reason":"Officer duty / church","added":false},{"name":"Joyce Malapitan","off1":"Wednesday","off2":"Sunday","shift":"Morning","reason":"Weekly visit to parents in Bulacan","added":false},{"name":"Bhea Cuenca","off1":"Wednesday","off2":"Thursday","shift":"Morning","reason":"Check-up and vaccination date for my child","added":false}]};
-/*AUTO-STATE-END*/
+/*AUTO-DAYOFF-START*/
+var DAYOFF_STATE = {"dayOffRequests":[{"name":"Raysan Garganta","off1":"Monday","off2":"Tuesday","shift":"Morning","reason":"","added":false},{"name":"Marianne Visda","off1":"Tuesday","off2":"Wednesday","shift":"Morning","reason":"","added":false},{"name":"Karen Dilig","off1":"Wednesday","off2":"Sunday","shift":"Afternoon","reason":"Officer duty / church","added":false},{"name":"Joyce Malapitan","off1":"Wednesday","off2":"Sunday","shift":"Morning","reason":"Weekly visit to parents in Bulacan","added":false},{"name":"Bhea Cuenca","off1":"Wednesday","off2":"Thursday","shift":"Morning","reason":"Check-up and vaccination date for my child","added":false}]};
+/*AUTO-DAYOFF-END*/
 var LEAVE_STATE = {"leaveRequests":[{"name":"Angelo","start":"Oct 1","end":"Oct 10","reason":"Birthday ng langgam ko","added":false},{"name":"Lanlie","start":"Oct 1","end":"Oct 3","reason":"Father's bday and school program","added":false},{"name":"Joyce","start":"","end":"","reason":"Uuwi po ng province for personal matters","added":false},{"name":"Carmina","start":"","end":"","reason":"Family reunion sa province","added":false},{"name":"Jasmin","start":"Oct 5","end":"Oct 7","reason":"Family gathering","added":false}]};
 
 var LATE_LOG = [
@@ -251,30 +251,6 @@ var REDELIVERY = {
   ]
 };
 
-/*AUTO-SCHEDULE-START*/
-var SCHEDULE = [
-  {agent:"Jubel",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","",""]},
-  {agent:"â€”",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
-  {agent:"Marianne",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
-  {agent:"Joyce",days:["08:00-17:00","","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
-  {agent:"Merly",days:["08:00-17:00","08:00-17:00","","","08:00-17:00","08:00-17:00","08:00-17:00"]},
-  {agent:"John",days:["08:00-17:00","08:00-17:00","08:00-17:00","","","08:00-17:00","08:00-17:00"]},
-  {agent:"Dhanica",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","","","08:00-17:00"]},
-  {agent:"Sharon",days:["08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","",""]},
-  {agent:"Jasmin",days:["","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00",""]},
-  {agent:"â€”",days:["","","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00","08:00-17:00"]},
-  {agent:"â€”",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"Reynalyn",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]},
-  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00"]},
-  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","",""]},
-  {agent:"â€”",days:["","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"â€”",days:["12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"â€”",days:["12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00","12:00-21:00"]},
-  {agent:"â€”",days:["12:00-21:00","12:00-21:00","12:00-21:00","","","12:00-21:00","12:00-21:00"]}
-];
-/*AUTO-SCHEDULE-END*/
-
 var CALLBACKS = [
   {agent:"Christian",hash:"X3Kg1aYg8n1zwJA",type:"Remarketing",date:"Sept 21",reason:"Wants to be a reseller"},
   {agent:"Christian",hash:"Zv5b0gZ84L1GXEQ",type:"Remarketing",date:"Sept 11",reason:"Pension"},
@@ -305,7 +281,7 @@ function pillPct(p){
 function renderNav(active, sections){
   var groups = [
     {label:"Performance", items:["ranking","performance"]},
-    {label:"Team", items:["shifts","leaveTracker"]},
+    {label:"Team", items:["leaveTracker"]},
     {label:"Playbooks", items:["remarketing","notordered","redeliveryAlgo"]},
     {label:"Reference", items:["gifts","redelivery"]},
     {label:"Follow-up", items:["callbacks"]}
@@ -323,8 +299,7 @@ function renderNav(active, sections){
 var SECTIONS = {
   ranking:{icon:"ðŸ†", label:"Ranking & Score", eyebrow:"Performance", title:"Ranking & Score", desc:"Weekly agent ranking by score and confirmation-call conversion rate."},
   performance:{icon:"ðŸ“ˆ", label:"Performance Update", eyebrow:"Performance", title:"Performance Update", desc:"Month-to-date confirmed orders vs. the same point last month, by agent."},
-  shifts:{icon:"ðŸ“…", label:"Shift & Time-Off", eyebrow:"Team", title:"Shift & Time-Off Requests", desc:"This week's shift schedule, plus a running sign-up sheet for day-off requests."},
-  leaveTracker:{icon:"ðŸ—“ï¸", label:"Leave & Late Tracker", eyebrow:"Team", title:"Leave & Late Tracker", desc:"Logged lateness for reference, plus a sign-up sheet for leave requests."},
+  leaveTracker:{icon:"ðŸ—“ï¸", label:"Leave & Late Tracker", eyebrow:"Team", title:"Leave & Late Tracker", desc:"Logged lateness for reference, plus sign-up sheets for leave and day-off requests."},
   remarketing:{icon:"â˜Žï¸", label:"Remarketing Call Flow", eyebrow:"Playbook", title:"Remarketing Call Flow", desc:"Script and decision paths for reconnecting with past customers."},
   notordered:{icon:"ðŸ”", label:"Not-Ordered Script", eyebrow:"Playbook", title:"Not-Ordered Algo", desc:"How to handle a customer who doesn't recognize the order on file."},
   redeliveryAlgo:{icon:"ðŸ“ž", label:"Redelivery Algorithm", eyebrow:"Playbook", title:"Redelivery Sales Algorithm", desc:"Script and decision paths for reconnecting on a failed or returned delivery."},
@@ -373,45 +348,10 @@ function performanceView(){
   '</div>';
 }
 
-function scheduleView(){
-  var head = ["Mon","Tue","Wed","Thu","Fri","Sat","Sun"];
-  var rows = SCHEDULE.map(function(r,i){
-    var cells = r.days.map(function(d){return '<td class="num">'+(d||"â€”")+'</td>';}).join("");
-    return '<tr><td>'+(i+1)+'</td><td>'+esc(r.agent)+'</td>'+cells+'</tr>';
-  }).join("");
-  return '<div class="tablewrap"><table class="grid"><thead><tr><th>#</th><th>Agent</th>'+head.map(function(h){return '<th class="num">'+h+'</th>';}).join("")+'</tr></thead><tbody>'+rows+'</tbody></table></div>';
-}
-
-function offRequestRows(){
-  return STATE.offRequests.map(function(r,i){
+function dayOffRequestRows(){
+  return DAYOFF_STATE.dayOffRequests.map(function(r,i){
     return '<tr><td>'+(i+1)+'</td><td>'+esc(r.name)+(r.added?'<span class="badge-added">added</span>':'')+'</td><td>'+esc(r.off1)+'</td><td>'+esc(r.off2)+'</td><td>'+esc(r.shift)+'</td><td class="wrap">'+esc(r.reason||"â€”")+'</td></tr>';
   }).join("");
-}
-
-function shiftsView(){
-  return '' +
-  '<div class="card">' +
-    '<h2>This weekâ€™s shift schedule</h2><div class="sub">Assigned working hours, Monday through Sunday.</div>' +
-    scheduleView() +
-  '</div>' +
-  '<div class="card">' +
-    '<h2>Day-off requests</h2><div class="sub">Add your name below to request a day off.</div>' +
-    '<div class="tablewrap"><table class="grid" id="offtable"><thead><tr><th>#</th><th>Agent</th><th>Off Day 1</th><th>Off Day 2</th><th>Shift</th><th>Reason</th></tr></thead><tbody>'+offRequestRows()+'</tbody></table></div>' +
-    '<h3 style="margin-top:18px;font-size:14px;">Add your request</h3>' +
-    '<form id="offform" autocomplete="off">' +
-      '<div class="formrow">' +
-        '<div><label for="f-name">Your name</label><input id="f-name" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
-        '<div><label for="f-off1">Off Day 1</label><select id="f-off1"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>' +
-        '<div><label for="f-off2">Off Day 2</label><select id="f-off2"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option selected>Sunday</option></select></div>' +
-        '<div><label for="f-shift">Shift</label><select id="f-shift"><option>Morning</option><option>Afternoon</option><option>Evening</option></select></div>' +
-      '</div>' +
-      '<div class="formrow" style="grid-template-columns:1fr;">' +
-        '<div><label for="f-reason">Reason (optional)</label><input id="f-reason" maxlength="120" placeholder="e.g. family event, appointment"></div>' +
-      '</div>' +
-      '<button type="submit" class="btn" id="f-submit">Add my name</button>' +
-      '<div class="savemsg" id="f-msg"></div>' +
-    '</form>' +
-  '</div>';
 }
 
 function leaveRequestRows(){
@@ -445,6 +385,24 @@ function leaveTrackerView(){
       '</div>' +
       '<button type="submit" class="btn" id="l-submit">Add my name</button>' +
       '<div class="savemsg" id="l-msg"></div>' +
+    '</form>' +
+  '</div>' +
+  '<div class="card">' +
+    '<h2>Day-off requests</h2><div class="sub">Add your name below to request a day off.</div>' +
+    '<div class="tablewrap"><table class="grid" id="dayofftable"><thead><tr><th>#</th><th>Agent</th><th>Off Day 1</th><th>Off Day 2</th><th>Shift</th><th>Reason</th></tr></thead><tbody>'+dayOffRequestRows()+'</tbody></table></div>' +
+    '<h3 style="margin-top:18px;font-size:14px;">Add your request</h3>' +
+    '<form id="doform" autocomplete="off">' +
+      '<div class="formrow">' +
+        '<div><label for="do-name">Your name</label><input id="do-name" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
+        '<div><label for="do-off1">Off Day 1</label><select id="do-off1"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>' +
+        '<div><label for="do-off2">Off Day 2</label><select id="do-off2"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option selected>Sunday</option></select></div>' +
+        '<div><label for="do-shift">Shift</label><select id="do-shift"><option>Morning</option><option>Afternoon</option><option>Evening</option></select></div>' +
+      '</div>' +
+      '<div class="formrow" style="grid-template-columns:1fr;">' +
+        '<div><label for="do-reason">Reason (optional)</label><input id="do-reason" maxlength="120" placeholder="e.g. family event, appointment"></div>' +
+      '</div>' +
+      '<button type="submit" class="btn" id="do-submit">Add my name</button>' +
+      '<div class="savemsg" id="do-msg"></div>' +
     '</form>' +
   '</div>';
 }
@@ -672,7 +630,7 @@ function renderApp(state){
   var active = ACTIVE || "ranking";
   var s = SECTIONS[active];
   var viewHtml = {
-    ranking: rankingView, performance: performanceView, shifts: shiftsView,
+    ranking: rankingView, performance: performanceView,
     leaveTracker: leaveTrackerView,
     remarketing: remarketingView, notordered: notOrderedView, redeliveryAlgo: redeliveryAlgoView,
     gifts: giftsView, redelivery: redeliveryView, callbacks: callbacksView
@@ -693,7 +651,7 @@ function renderApp(state){
 
 function setActive(id){
   ACTIVE = id;
-  document.getElementById('app').innerHTML = renderApp(STATE);
+  document.getElementById('app').innerHTML = renderApp();
   attachHandlers();
   document.getElementById('app').scrollIntoView({block:'start'});
 }
@@ -710,29 +668,29 @@ function attachHandlers(){
     toggle.addEventListener('click', function(){ side.classList.add('open'); scrim.classList.add('show'); });
     scrim.addEventListener('click', function(){ side.classList.remove('open'); scrim.classList.remove('show'); });
   }
-  var form = document.getElementById('offform');
-  if (form){
-    form.addEventListener('submit', function(e){
+  var doForm = document.getElementById('doform');
+  if (doForm){
+    doForm.addEventListener('submit', function(e){
       e.preventDefault();
-      var name = document.getElementById('f-name').value.trim();
+      var name = document.getElementById('do-name').value.trim();
       if (!name) return;
       var entry = {
         name: name,
-        off1: document.getElementById('f-off1').value,
-        off2: document.getElementById('f-off2').value,
-        shift: document.getElementById('f-shift').value,
-        reason: document.getElementById('f-reason').value.trim(),
+        off1: document.getElementById('do-off1').value,
+        off2: document.getElementById('do-off2').value,
+        shift: document.getElementById('do-shift').value,
+        reason: document.getElementById('do-reason').value.trim(),
         added: true
       };
-      STATE.offRequests.push(entry);
-      var submitBtn = document.getElementById('f-submit');
-      var msg = document.getElementById('f-msg');
+      DAYOFF_STATE.dayOffRequests.push(entry);
+      var submitBtn = document.getElementById('do-submit');
+      var msg = document.getElementById('do-msg');
       submitBtn.disabled = true;
       msg.textContent = 'Addingâ€¦';
       msg.className = 'savemsg';
       setTimeout(function(){
-        setActive('shifts');
-        var m = document.getElementById('f-msg');
+        setActive('leaveTracker');
+        var m = document.getElementById('do-msg');
         if (m){ m.textContent = 'Added to this list on your device. Note: this file isnâ€™t connected to a shared server, so this addition stays local to your browser â€” send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
       }, 200);
     });
@@ -767,7 +725,7 @@ function attachHandlers(){
 }
 
 function boot(){
-  document.getElementById('app').innerHTML = renderApp(STATE);
+  document.getElementById('app').innerHTML = renderApp();
   attachHandlers();
 }
 if (document.readyState === 'loading'){ document.addEventListener('DOMContentLoaded', boot); } else { boot(); }
