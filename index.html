@@ -1,29 +1,32 @@
 <!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
-<title>Confirmation Desk</title>
+<title>Remarketing Team</title>
 <style id="page-style">
   :root{
-    --bg:#eef1f3; --surface:#ffffff; --surface-2:#f6f8f9; --border:#d8dfe4;
-    --text:#182430; --text-dim:#59707d; --accent:#0b6e4f; --accent-ink:#ffffff;
-    --accent-soft:#e3f2ea; --warn:#a15c00; --warn-soft:#fbeed9; --danger:#b3261e;
+    --bg:#eef6fb; --surface:#ffffff; --surface-2:#eaf4fb; --border:#cfe3f0;
+    --text:#132635; --text-dim:#5b7c90; --accent:#0284c7; --accent-ink:#ffffff;
+    --accent-soft:#e0f2fe; --warn:#a15c00; --warn-soft:#fbeed9; --danger:#b3261e;
     --danger-soft:#fbe6e3; --gold:#9a6b00; --gold-soft:#fbf1da; --silver:#5b6b76; --silver-soft:#eef1f3;
-    --shadow:0 1px 2px rgba(20,30,40,.06),0 8px 24px rgba(20,30,40,.06);
+    --shadow:0 1px 2px rgba(15,50,70,.06),0 8px 24px rgba(15,50,70,.07);
     --radius:10px;
+    --hero-grad:linear-gradient(135deg,#0284c7 0%,#38bdf8 55%,#7dd3fc 100%);
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
-      --bg:#10161a; --surface:#171f24; --surface-2:#1c252b; --border:#2b363d;
-      --text:#e8eef1; --text-dim:#9db0bb; --accent:#3fc98d; --accent-ink:#08130f;
-      --accent-soft:#173428; --warn:#e3ab5c; --warn-soft:#2e2413; --danger:#f0796d;
-      --danger-soft:#331e1c; --gold:#d9b154; --gold-soft:#3a2f12; --silver:#aebac1; --silver-soft:#232c32;
+      --bg:#0a1620; --surface:#0f2130; --surface-2:#152a3b; --border:#20394b;
+      --text:#e6f2fa; --text-dim:#8db0c4; --accent:#38bdf8; --accent-ink:#052030;
+      --accent-soft:#123349; --warn:#e3ab5c; --warn-soft:#2e2413; --danger:#f0796d;
+      --danger-soft:#331e1c; --gold:#d9b154; --gold-soft:#3a2f12; --silver:#aebac1; --silver-soft:#1b2c38;
       --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+      --hero-grad:linear-gradient(135deg,#0c3a56 0%,#0d5c86 55%,#1489c4 100%);
     }
   }
   :root[data-theme="dark"]{
-    --bg:#10161a; --surface:#171f24; --surface-2:#1c252b; --border:#2b363d;
-    --text:#e8eef1; --text-dim:#9db0bb; --accent:#3fc98d; --accent-ink:#08130f;
-    --accent-soft:#173428; --warn:#e3ab5c; --warn-soft:#2e2413; --danger:#f0796d;
-    --danger-soft:#331e1c; --gold:#d9b154; --gold-soft:#3a2f12; --silver:#aebac1; --silver-soft:#232c32;
+    --bg:#0a1620; --surface:#0f2130; --surface-2:#152a3b; --border:#20394b;
+    --text:#e6f2fa; --text-dim:#8db0c4; --accent:#38bdf8; --accent-ink:#052030;
+    --accent-soft:#123349; --warn:#e3ab5c; --warn-soft:#2e2413; --danger:#f0796d;
+    --danger-soft:#331e1c; --gold:#d9b154; --gold-soft:#3a2f12; --silver:#aebac1; --silver-soft:#1b2c38;
     --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px rgba(0,0,0,.35);
+    --hero-grad:linear-gradient(135deg,#0c3a56 0%,#0d5c86 55%,#1489c4 100%);
   }
   *{box-sizing:border-box;}
   body{background:var(--bg); color:var(--text); font-family:"Source Sans 3",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; -webkit-font-smoothing:antialiased;}
@@ -67,6 +70,14 @@
   .card{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); box-shadow:var(--shadow); padding:20px; margin-bottom:20px;}
   .card > h2{font-size:17px; font-weight:800; margin-bottom:2px;}
   .card > .sub{color:var(--text-dim); font-size:13.5px; margin-bottom:14px;}
+
+  .hero{background:var(--hero-grad); border-radius:16px; padding:30px 32px; color:#fff; box-shadow:var(--shadow); margin-bottom:4px;}
+  .hero-greeting{font-size:14px; font-weight:700; opacity:.9; text-transform:uppercase; letter-spacing:.05em; margin-bottom:10px;}
+  .hero-quote{font-size:22px; font-weight:700; line-height:1.45; max-width:62ch; text-wrap:balance;}
+  .quicklinks{display:grid; grid-template-columns:repeat(auto-fit,minmax(190px,1fr)); gap:10px;}
+  .qlink{display:flex; align-items:center; gap:10px; text-align:left; background:var(--surface-2); border:1px solid var(--border); border-radius:9px; padding:12px 14px; font:inherit; font-size:13.5px; font-weight:700; color:var(--text); cursor:pointer;}
+  .qlink:hover{border-color:var(--accent); color:var(--accent);}
+  .qlink-ic{font-size:17px; flex:none;}
 
   .tiles{display:grid; grid-template-columns:repeat(auto-fit,minmax(160px,1fr)); gap:12px; margin-bottom:20px;}
   .tile{background:var(--surface); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; box-shadow:var(--shadow);}
@@ -172,7 +183,7 @@
 <div id="app"></div>
 
 <script id="page-script">
-var ACTIVE = "ranking";
+var ACTIVE = "home";
 // "Remember me": the agent's own name, kept in this browser only (localStorage),
 // used to highlight their own row in Ranking & Score and pre-fill "Your name"
 // fields on the Leave / Day-off / Referral forms. Wrapped in try/catch since
@@ -201,7 +212,7 @@ var DAYOFF_STATE = {"dayOffRequests":[]};
 /*AUTO-DAYOFF-END*/
 var LEAVE_STATE = {"leaveRequests":[{"name":"Angelo","start":"Oct 1","end":"Oct 10","reason":"Birthday ng langgam ko","added":false},{"name":"Lanlie","start":"Oct 1","end":"Oct 3","reason":"Father's bday and school program","added":false},{"name":"Joyce","start":"","end":"","reason":"Uuwi po ng province for personal matters","added":false},{"name":"Carmina","start":"","end":"","reason":"Family reunion sa province","added":false},{"name":"Jasmin","start":"Oct 5","end":"Oct 7","reason":"Family gathering","added":false}]};
 /*AUTO-UPDATED-START*/
-var LAST_UPDATED_ISO = "2026-09-22T05:52:53.762Z";
+var LAST_UPDATED_ISO = "2026-09-16T00:00:00.000Z";
 /*AUTO-UPDATED-END*/
 
 var LATE_LOG = [
@@ -217,52 +228,52 @@ var LATE_LOG = [
 
 /*AUTO-RANKING-START*/
 var RANKING = [
-  {agent:"Filipina Bonifacio",score:20,conv:"12.90%",total:54.9,rank:8},
-  {agent:"Merly Palomares",score:30,conv:"15.71%",total:74.9,rank:4},
-  {agent:"Mary Fontanilla",score:35,conv:"24.48%",total:100,rank:1},
-  {agent:"Dhanica Dadoya",score:26,conv:"18.57%",total:75.1,rank:3},
-  {agent:"Jubel Siagan",score:14,conv:"24.14%",total:69.3,rank:5},
-  {agent:"Sharon SanJuan",score:32,conv:"19.05%",total:84.6,rank:2},
-  {agent:"Joyce Malapitan",score:19,conv:"16.81%",total:61.5,rank:7},
-  {agent:"Marianne Visda",score:10,conv:"12.50%",total:39.8,rank:10},
-  {agent:"Lanlie Mayor",score:11,conv:"8.46%",total:33,rank:14},
-  {agent:"Christian Tad-y",score:10,conv:"10.10%",total:34.9,rank:13},
-  {agent:"Reynalyn Roco",score:14,conv:"20.59%",total:62.1,rank:6},
-  {agent:"Carmina Fernandez",score:8,conv:"7.55%",total:26.8,rank:18},
-  {agent:"John Jamero",score:9,conv:"11.39%",total:36.1,rank:11},
-  {agent:"Raysan Garganta",score:8,conv:"10.13%",total:32.1,rank:15},
-  {agent:"Jasmin Aruta",score:16,conv:"10.32%",total:43.9,rank:9},
-  {agent:"Trina Idaloy",score:7,conv:"7.45%",total:25.2,rank:19},
-  {agent:"Bhea Cuenca",score:9,conv:"11.25%",total:35.8,rank:12},
-  {agent:"Jonaliza Guevarra",score:7,conv:"10.61%",total:31.7,rank:16},
-  {agent:"Karen Dilig",score:9,conv:"7.56%",total:28.3,rank:17}
+  {agent:"Joyce Malapitan",score:24,conv:"16.44%",total:92.9,rank:1},
+  {agent:"Mary Fontanilla",score:28,conv:"10.37%",total:81.5,rank:2},
+  {agent:"Merly Palomares",score:24,conv:"12.57%",total:81.1,rank:3},
+  {agent:"Dhanica Dadoya",score:26,conv:"11.40%",total:81.1,rank:3},
+  {agent:"Jubel Siagan",score:14,conv:"14.43%",total:68.9,rank:5},
+  {agent:"Sharon SanJuan",score:19,conv:"11.11%",total:67.7,rank:6},
+  {agent:"Jonaliza Guevarra",score:18,conv:"10.59%",total:64.4,rank:7},
+  {agent:"Reynalyn Roco",score:15,conv:"10.42%",total:58.5,rank:8},
+  {agent:"Christian Tad-y",score:16,conv:"8.12%",total:53.3,rank:9},
+  {agent:"Filipina Bonifacio",score:15,conv:"8.06%",total:51.3,rank:10},
+  {agent:"Marianne Visda",score:13,conv:"6.84%",total:44,rank:11},
+  {agent:"Raysan Garganta",score:12,conv:"6.98%",total:42.7,rank:12},
+  {agent:"Trina Idaloy",score:11,conv:"5.14%",total:35.3,rank:13},
+  {agent:"Karen Dilig",score:9,conv:"4.05%",total:28.4,rank:14},
+  {agent:"Carmina Fernandez",score:7,conv:"4.90%",total:27.4,rank:15},
+  {agent:"Jasmin Aruta",score:7,conv:"3.93%",total:24.5,rank:16},
+  {agent:"John Jamero",score:5,conv:"3.79%",total:20.5,rank:17},
+  {agent:"Bhea Cuenca",score:4,conv:"2.80%",total:15.7,rank:18},
+  {agent:"Lanlie Mayor",score:4,conv:"2.70%",total:15.4,rank:19}
 ].sort(function(a,b){return a.rank-b.rank;});
 /*AUTO-RANKING-END*/
 
 /*AUTO-PERF-START*/
 var PERF = {
   rows:[
-    {a:"Jubel Siagan",cur:44,prev:31,diff:"+13",pct:"42%",avg:"\u20b13,114.43",calls:"191",conv:"23%"},
-    {a:"Filipina Bonifacio",cur:40,prev:55,diff:"-15",pct:"-27%",avg:"\u20b12,802.93",calls:"364",conv:"11%"},
-    {a:"Sharon SanJuan",cur:65,prev:40,diff:"+25",pct:"63%",avg:"\u20b12,773.11",calls:"414",conv:"16%"},
-    {a:"Christian Tad-y",cur:30,prev:24,diff:"+6",pct:"25%",avg:"\u20b12,696.93",calls:"361",conv:"8%"},
-    {a:"Merly Palomares",cur:69,prev:66,diff:"+3",pct:"5%",avg:"\u20b13,022.67",calls:"449",conv:"15%"},
-    {a:"Marianne Visda",cur:38,prev:35,diff:"+3",pct:"9%",avg:"\u20b12,766.71",calls:"311",conv:"12%"},
-    {a:"Joyce Malapitan",cur:59,prev:35,diff:"+24",pct:"69%",avg:"\u20b12,495.47",calls:"287",conv:"21%"},
-    {a:"Lanlie Mayor",cur:22,prev:29,diff:"-7",pct:"-24%",avg:"\u20b12,372.86",calls:"349",conv:"6%"},
-    {a:"Carmina Fernandez",cur:20,prev:23,diff:"-3",pct:"-13%",avg:"\u20b12,720.85",calls:"317",conv:"6%"},
-    {a:"Raysan Garganta",cur:28,prev:18,diff:"+10",pct:"56%",avg:"\u20b12,711.43",calls:"299",conv:"9%"},
-    {a:"Trina Idaloy",cur:22,prev:19,diff:"+3",pct:"16%",avg:"\u20b12,668.09",calls:"268",conv:"8%"},
-    {a:"Mary Fontanilla",cur:89,prev:91,diff:"-2",pct:"-2%",avg:"\u20b12,631.16",calls:"488",conv:"18%"},
-    {a:"John Jamero",cur:16,prev:18,diff:"-2",pct:"-11%",avg:"\u20b12,899.94",calls:"203",conv:"8%"},
-    {a:"Reynalyn Roco",cur:40,prev:30,diff:"+10",pct:"33%",avg:"\u20b13,046.93",calls:"181",conv:"22%"},
-    {a:"Dhanica Dadoya",cur:79,prev:52,diff:"+27",pct:"52%",avg:"\u20b12,340.47",calls:"526",conv:"15%"},
-    {a:"Jasmin Aruta",cur:36,prev:28,diff:"+8",pct:"29%",avg:"\u20b12,737.61",calls:"327",conv:"11%"},
-    {a:"Karen Dilig",cur:36,prev:0,diff:"+36",pct:"3600%",avg:"\u20b12,948.44",calls:"429",conv:"8%"},
-    {a:"Jonaliza Guevarra",cur:38,prev:0,diff:"+38",pct:"3800%",avg:"\u20b13,041.11",calls:"306",conv:"12%"},
-    {a:"Bhea Cuenca",cur:16,prev:0,diff:"+16",pct:"1600%",avg:"\u20b12,752.25",calls:"209",conv:"8%"}
+    {a:"Mary Fontanilla",cur:71,prev:58,diff:"+13",pct:"22%",avg:"\u20B12,533.96",calls:447,conv:"16%"},
+    {a:"Merly Palomares",cur:48,prev:39,diff:"+9",pct:"23%",avg:"\u20B12,926.33",calls:330,conv:"15%"},
+    {a:"Sharon SanJuan",cur:44,prev:26,diff:"+18",pct:"69%",avg:"\u20B12,942.02",calls:323,conv:"14%"},
+    {a:"Dhanica Dadoya",cur:50,prev:35,diff:"+15",pct:"43%",avg:"\u20B12,376.84",calls:385,conv:"13%"},
+    {a:"Jonaliza Guevarra",cur:29,prev:0,diff:"+29",pct:"2900%",avg:"\u20B12,682.76",calls:244,conv:"12%"},
+    {a:"Reynalyn Roco",cur:26,prev:19,diff:"+7",pct:"37%",avg:"\u20B12,877.54",calls:136,conv:"19%"},
+    {a:"Christian Tad-y",cur:26,prev:21,diff:"+5",pct:"24%",avg:"\u20B12,582.23",calls:328,conv:"8%"},
+    {a:"Jubel Siagan",cur:39,prev:24,diff:"+15",pct:"63%",avg:"\u20B12,975.62",calls:184,conv:"21%"},
+    {a:"Joyce Malapitan",cur:39,prev:31,diff:"+8",pct:"26%",avg:"\u20B12,413.15",calls:204,conv:"19%"},
+    {a:"Jasmin Aruta",cur:26,prev:14,diff:"+12",pct:"86%",avg:"\u20B12,578.27",calls:263,conv:"10%"},
+    {a:"Karen Dilig",cur:31,prev:0,diff:"+31",pct:"3100%",avg:"\u20B12,837.29",calls:330,conv:"9%"},
+    {a:"Marianne Visda",cur:31,prev:29,diff:"+2",pct:"7%",avg:"\u20B12,528.39",calls:294,conv:"11%"},
+    {a:"Filipina Bonifacio",cur:30,prev:35,diff:"-5",pct:"-14%",avg:"\u20B12,758.97",calls:316,conv:"9%"},
+    {a:"Trina Idaloy",cur:16,prev:11,diff:"+5",pct:"45%",avg:"\u20B12,513.56",calls:240,conv:"7%"},
+    {a:"Raysan Garganta",cur:25,prev:11,diff:"+14",pct:"127%",avg:"\u20B12,638.64",calls:273,conv:"9%"},
+    {a:"Bhea Cuenca",cur:10,prev:0,diff:"+10",pct:"1000%",avg:"\u20B12,500.00",calls:140,conv:"7%"},
+    {a:"John Jamero",cur:8,prev:10,diff:"-2",pct:"-20%",avg:"\u20B12,586.50",calls:143,conv:"6%"},
+    {a:"Carmina Fernandez",cur:12,prev:16,diff:"-4",pct:"-25%",avg:"\u20B12,675.50",calls:234,conv:"5%"},
+    {a:"Lanlie Mayor",cur:12,prev:25,diff:"-13",pct:"-52%",avg:"\u20B12,514.75",calls:248,conv:"5%"}
   ],
-  total:{cur:787,prev:594,diff:"+193",pct:"32%",avg:"\u20b12,749.84",calls:"6,279",conv:"13%"},
+  total:{cur:573,prev:404,diff:"+169",pct:"42%",avg:"\u20B12,781.64",calls:"5,062",conv:"11%"},
   pace:{above:11,below:5},
   august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"\u20B12,514.73",avgPrev:"\u20B12,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
 };
@@ -270,37 +281,17 @@ var PERF = {
 
 /*AUTO-GIFTS-START*/
 var GIFTS = [
-  ["Arti-flex","Easy Go","Easy Go"],
-  ["Optiheal","Easy Go","Easy Go"],
-  ["Footurel","Easy Go","Easy Go"],
-  ["Variflex","Easy Go","Easy Go"],
-  ["D-Up","Prostaman","Prostaman"],
-  ["Vitaman Plus","Prostaman","Prostaman"],
-  ["Prostaman","Easy Go","Easy Go"],
-  ["Neo Card Potency","Prostaman","Prostaman"],
-  ["TensoLumen","Easy Go","Variflex"],
-  ["Neocardia","Easy Go","Variflex"],
-  ["Glucofortis","Footurel Gel","Variflex"],
-  ["Ketonica","Variflex","Retinlift"],
-  ["Wellatox","Variflex","Retinlift"],
-  ["Rootera","Variflex","Retinlift"],
-  ["Retinlift","Footurel Gel","Variflex"],
-  ["Easy Go","Easy Go","Easy Go"]
+  ["Easy Go Max","Easy Go","Easy Go"],["Arti-flex","Easy Go","Easy Go"],["Optiheal","Easy Go","Easy Go"],
+  ["Footurel","Easy Go","Easy Go"],["Variflex","Easy Go","Easy Go"],["D-Up","Prostaman","Prostaman"],
+  ["Vitaman Plus","Prostaman","Prostaman"],["Prostaman","Easy Go","Easy Go"],["Neo Card Potency","Prostaman","Prostaman"],
+  ["TensoLumen","Easy Go","Variflex"],["Neocardia","Easy Go","Variflex"],["Glucofortis","Footurel Gel","Variflex"],
+  ["Ketonica","Variflex","Retinlift"],["Wellatox","Variflex","Retinlift"],["Rootera","Variflex","Retinlift"],
+  ["Retinlift","Footurel Gel","Variflex"],["Easy Go","Easy Go","Easy Go"]
 ];
 /*AUTO-GIFTS-END*/
 
 /*AUTO-PRICING-START*/
-var PRICING = [
-  ["Main Product","1","1990","1,035","299"],
-  ["Main Product","5","2,745","1,650",""],
-  ["Main Product","3","2,187","1,320",""],
-  ["Main Product","2","1,640","990",""],
-  ["Main Product","1","990","590",""],
-  ["Main Product","5","2,275","1,500",""],
-  ["Main Product","3","1,515","999",""],
-  ["Main Product","2","1,140","830",""],
-  ["Main Product","1","690","419",""]
-];
+var PRICING = [];
 /*AUTO-PRICING-END*/
 
 var REDELIVERY = {
@@ -373,6 +364,7 @@ function pillPct(p){
 
 function renderNav(active, sections){
   var groups = [
+    {label:"", items:["home"]},
     {label:"Performance", items:["ranking","performance"]},
     {label:"Team", items:["leaveTracker"]},
     {label:"Playbooks", items:["remarketing","notordered","redeliveryAlgo"]},
@@ -384,12 +376,14 @@ function renderNav(active, sections){
       var s = sections[id];
       return '<button class="navlink" data-nav="'+id+'" aria-current="'+(id===active?"true":"false")+'"><span class="ic">'+s.icon+'</span>'+s.label+'</button>';
     }).join("");
-    return '<div class="group"><span class="label">'+g.label+'</span>'+items+'</div>';
+    var labelHtml = g.label ? '<span class="label">'+g.label+'</span>' : '';
+    return '<div class="group">'+labelHtml+items+'</div>';
   }).join("");
   return html;
 }
 
 var SECTIONS = {
+  home:{icon:"\u2600\uFE0F", label:"Home", eyebrow:"Welcome", title:"Remarketing Team", desc:"Your daily boost, plus quick links to everything the desk runs on."},
   ranking:{icon:"\uD83C\uDFC6", label:"Ranking & Score", eyebrow:"Performance", title:"Ranking & Score", desc:"Full weekly agent ranking by confirmed orders and conversion rate."},
   performance:{icon:"\uD83D\uDCC8", label:"Performance Update", eyebrow:"Performance", title:"Performance Update", desc:"Month-to-date confirmed orders vs. the same point last month, by agent."},
   leaveTracker:{icon:"\uD83D\uDDD3\uFE0F", label:"Leave & Late Tracker", eyebrow:"Team", title:"Leave & Late Tracker", desc:"Logged lateness for reference, plus sign-up sheets for leave and day-off requests."},
@@ -400,6 +394,79 @@ var SECTIONS = {
   redelivery:{icon:"\uD83D\uDCE6", label:"Redelivery Reasons", eyebrow:"Reference", title:"Redelivery Tagging", desc:"Standard reason codes for rejected orders and for redelivery approvals."},
   callbacks:{icon:"\u260E\uFE0F", label:"Manual Callbacks", eyebrow:"Follow-up", title:"Manual Callbacks", desc:"Open referral leads, plus a sign-up form for new referrals."}
 };
+
+// One new line every calendar day, same for everyone on the team that day  -
+// picked deterministically from today's date rather than at random, so it
+// doesn't change on a refresh and isn't tied to any real person's words.
+var QUOTES = [
+  "Every call is a fresh start \u2014 the last one doesn\u2019t decide this one.",
+  "Remarketing isn\u2019t chasing a sale. It\u2019s remembering a person who once said yes.",
+  "The customer who didn\u2019t answer today might answer tomorrow. Keep the line open.",
+  "A calm voice reopens more doors than a rushed one ever will.",
+  "Small, steady improvements beat one big push. Get 1% better with every call.",
+  "You\u2019re not just calling back an order \u2014 you\u2019re calling back trust.",
+  "The best time to reconnect was yesterday. The second best time is this call.",
+  "Confidence isn\u2019t loud. It\u2019s just prepared.",
+  "Every \u201Cno\u201D today is data for a better \u201Cyes\u201D tomorrow.",
+  "Great remarketing sounds like a friend checking in \u2014 not a stranger asking for something.",
+  "Consistency is the quiet skill that makes the loud results possible.",
+  "You don\u2019t need a perfect script. You need a real conversation.",
+  "Progress, not perfection \u2014 one more call, one more customer, one more day.",
+  "The team that shows up steady, wins steady.",
+  "Patience is a sales skill. So is persistence. Bring both today.",
+  "A good remarketing call solves a problem before it pitches a product.",
+  "Numbers move because people show up. Show up today.",
+  "Rest when you need to. Then come back and dial again.",
+  "The goal isn\u2019t just to close the sale \u2014 it\u2019s to reopen the relationship.",
+  "Every day is a chance to be a little better than yesterday\u2019s version of this team."
+];
+function dayOfYear(d){
+  var start = new Date(d.getFullYear(), 0, 0);
+  var diff = d - start;
+  return Math.floor(diff / 86400000);
+}
+function quoteOfTheDay(){
+  var idx = dayOfYear(new Date()) % QUOTES.length;
+  return QUOTES[idx];
+}
+function greetingLine(){
+  var hour = new Date().getHours();
+  var part = hour < 12 ? "Good morning" : (hour < 18 ? "Good afternoon" : "Good evening");
+  return AGENT_NAME ? (part + ", " + AGENT_NAME + ".") : (part + ", team.");
+}
+function homeView(){
+  var topAgent = RANKING.slice().sort(function(a,b){return a.rank-b.rank;})[0];
+  var mtd = PERF.total.cur;
+  var highlights = '' +
+    '<div class="tiles" style="margin-top:16px;">' +
+      '<div class="tile"><div class="k">This week\u2019s top agent</div><div class="v" style="font-size:16px;">'+esc(topAgent ? topAgent.agent : "\u2014")+'</div><div class="d">Rank #1 by total score</div></div>' +
+      '<div class="tile"><div class="k">Confirmed orders (MTD)</div><div class="v">'+mtd+'</div><div class="d">Team total, month to date</div></div>' +
+      '<div class="tile"><div class="k">Agents above pace</div><div class="v">'+PERF.pace.above+'</div><div class="d up">tracking ahead of last month</div></div>' +
+    '</div>';
+  var quickLinks = [
+    {id:"ranking", label:"Ranking & Score", icon:"\uD83C\uDFC6"},
+    {id:"performance", label:"Performance Update", icon:"\uD83D\uDCC8"},
+    {id:"leaveTracker", label:"Leave & Late Tracker", icon:"\uD83D\uDDD3\uFE0F"},
+    {id:"remarketing", label:"Remarketing Call Flow", icon:"\u260E\uFE0F"},
+    {id:"notordered", label:"Not-Ordered Script", icon:"\uD83D\uDD0D"},
+    {id:"redeliveryAlgo", label:"Redelivery Algorithm", icon:"\uD83D\uDCDE"},
+    {id:"gifts", label:"Free Gift Guide", icon:"\uD83C\uDF81"},
+    {id:"redelivery", label:"Redelivery Reasons", icon:"\uD83D\uDCE6"},
+    {id:"callbacks", label:"Manual Callbacks", icon:"\u260E\uFE0F"}
+  ].map(function(q){
+    return '<button type="button" class="qlink" data-nav="'+q.id+'"><span class="qlink-ic">'+q.icon+'</span>'+esc(q.label)+'</button>';
+  }).join("");
+  return '' +
+  '<div class="hero">' +
+    '<div class="hero-greeting">'+esc(greetingLine())+'</div>' +
+    '<div class="hero-quote">\u201C'+esc(quoteOfTheDay())+'\u201D</div>' +
+  '</div>' +
+  highlights +
+  '<div class="card" style="margin-top:20px;">' +
+    '<h2>Jump back in</h2><div class="sub">Everything the desk runs on, one tap away.</div>' +
+    '<div class="quicklinks">'+quickLinks+'</div>' +
+  '</div>';
+}
 
 function rankingView(){
   var myName = norm(AGENT_NAME);
@@ -818,6 +885,7 @@ function redeliveryAlgoView(){
 }
 
 var VIEW_FNS = {
+  home: homeView,
   ranking: rankingView, performance: performanceView,
   leaveTracker: leaveTrackerView,
   remarketing: remarketingView, notordered: notOrderedView, redeliveryAlgo: redeliveryAlgoView,
@@ -825,7 +893,7 @@ var VIEW_FNS = {
 };
 
 function renderApp(state){
-  var active = ACTIVE || "ranking";
+  var active = ACTIVE || "home";
   var s = SECTIONS[active];
   var viewHtml = VIEW_FNS[active]();
 
@@ -833,7 +901,7 @@ function renderApp(state){
   '<div class="mobilebar"><button id="navtoggle" aria-label="Open menu">\u2630</button><strong>'+esc(SECTIONS[active].title)+'</strong></div>' +
   '<div class="scrim" id="scrim"></div>' +
   '<aside class="side" id="sidenav">' +
-    '<div class="brand"><div class="mark">\u260E\uFE0F</div><div class="txt"><strong>Confirmation Desk</strong><span>Team ops hub</span></div></div>' +
+    '<div class="brand"><div class="mark">\u2601\uFE0F</div><div class="txt"><strong>Remarketing Team</strong><span>Every call is a fresh start</span></div></div>' +
     '<div class="sidebox">' +
       '<span class="label">Your name</span>' +
       '<div class="whoami-row">' +
