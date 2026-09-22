@@ -114,11 +114,21 @@ function requireCol(headerRow, label, opts, sheetLabel) {
 // own header row further down  -  so scan from `from` through the whole
 // sheet for a row that contains ALL of the given labels, rather than
 // assuming row 0 is it or that every block shares one header row.
-function locateHeaderRow(rows, labels, sheetLabel, { from = 0 } = {}) {
+// `last: true` scans the whole sheet and keeps the LAST matching row instead
+// of stopping at the first  -  needed for the Ranking/Score tab, where "Off 1"
+// legitimately appears twice: once in row 1's wide template/label row (which
+// has no real data under it), and again as the actual Day-off block's own
+// header further down. Every other caller wants the first match, same as before.
+function locateHeaderRow(rows, labels, sheetLabel, { from = 0, last = false } = {}) {
+  let found = -1;
   for (let r = from; r < rows.length; r++) {
     const ok = labels.every(l => findCol(rows[r], l, { mode: "contains" }) !== -1);
-    if (ok) return r;
+    if (ok) {
+      found = r;
+      if (!last) return r;
+    }
   }
+  if (found !== -1) return found;
   throw new Error(
     `Could not find a header row containing all of [${labels.join(", ")}] ` +
     `in "${sheetLabel}" anywhere from row ${from + 1} onward (${rows.length} rows total). ` +
@@ -161,12 +171,12 @@ async function fetchSheetCsvByGid(gid, bust) {
   return parseCsv(text);
 }
 
-async function getValidatedSheetByGid(gid, requiredLabels, sheetLabel, attempts = 3) {
+async function getValidatedSheetByGid(gid, requiredLabels, sheetLabel, attempts = 3, locateOpts = {}) {
   let lastErr;
   for (let attempt = 1; attempt <= attempts; attempt++) {
     try {
       const rows = await fetchSheetCsvByGid(gid, attempt > 1 ? `${Date.now()}-${attempt}` : undefined);
-      const headerRowIdx = locateHeaderRow(rows, requiredLabels, sheetLabel);
+      const headerRowIdx = locateHeaderRow(rows, requiredLabels, sheetLabel, locateOpts);
       return { rows, headerRowIdx };
     } catch (err) {
       lastErr = err;
@@ -260,6 +270,13 @@ async function buildPerf(existingAugustLiteral) {
 
   const agentRows = [];
   let paceAbove = 0, paceBelow = 0;
+  // The sheet's own "TOTAL" row ends the real per-agent list, but the pace
+  // KPI rows this function cares about sit a few rows BELOW that Total (see
+  // the block comment above)  -  so this can no longer be a `break`. Once
+  // pastAgentTotal flips true, only the two pace labels are still extracted;
+  // every other trailing row (Metric, Gen. Total, Highest Improvement,
+  // Months, July, August, ...) is just skipped, not pushed as an agent.
+  let pastAgentTotal = false;
   for (let i = headerRowIdx + 1; i < rows.length; i++) {
     const r = rows[i];
     const agent = esc(r[agentCol]);
@@ -269,7 +286,8 @@ async function buildPerf(existingAugustLiteral) {
     if (agentNorm.includes("agents above")) { paceAbove = Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0; continue; }
     if (agentNorm.includes("agents below")) { paceBelow = Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0; continue; }
     if (DROP_LABELS.some(l => agentNorm.includes(l))) continue;
-    if (agentNorm.includes("total")) break; // the sheet's own (unrelated) Total row ends this block
+    if (agentNorm.includes("total")) { pastAgentTotal = true; continue; } // the sheet's own (unrelated) Total row ends the per-agent block  -  but pace KPI rows still follow it
+    if (pastAgentTotal) continue; // trailing KPI/month-recap noise after the Total row
     agentRows.push({
       a: agent,
       cur: Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0,
@@ -333,7 +351,10 @@ async function buildPerf(existingAugustLiteral) {
 // trusting a hardcoded position.
 async function buildDayOffRequests() {
   const sheetLabel = "Ranking/Score (day-off block)";
-  const { rows, headerRowIdx } = await getValidatedSheetByGid(GID_RANKING, ["Off 1"], sheetLabel);
+  // "Off 1" also appears in row 1's wide template header (no real data under
+  // it there)  -  { last: true } skips past that and locates the actual
+  // Day-off block's own header further down the tab.
+  const { rows, headerRowIdx } = await getValidatedSheetByGid(GID_RANKING, ["Off 1"], sheetLabel, 3, { last: true });
   const header = rows[headerRowIdx];
   const off1Col = requireCol(header, "Off 1", {}, sheetLabel);
   const nameCol = off1Col - 1;
@@ -516,6 +537,12 @@ async function main() {
   html = replaceBlock(html, "GIFTS", giftsLiteral);
   html = replaceBlock(html, "PRICING", pricingLiteral);
   html = replaceBlock(html, "DAYOFF", dayOffLiteral);
+
+  // A plain ISO timestamp for "this is how fresh the data on this page is"  -
+  // formatted into the viewer's own local time client-side (see formatLastUpdated
+  // in the page script), not baked in as a fixed string here.
+  const updatedLiteral = `var LAST_UPDATED_ISO = ${JSON.stringify(new Date().toISOString())};`;
+  html = replaceBlock(html, "UPDATED", updatedLiteral);
 
   writeFileSync(FILE, html, "utf8");
   console.log("index.html refreshed successfully from the Google Sheet.");
