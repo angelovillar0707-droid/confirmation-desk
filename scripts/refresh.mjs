@@ -243,7 +243,7 @@ async function buildRanking() {
 async function buildPerf(existingAugustLiteral) {
   const sheetLabel = "Performance Update";
   const { rows, headerRowIdx } = await getValidatedSheetByGid(
-    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled"], sheetLabel
+    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled", "Total Sales"], sheetLabel
   );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
@@ -254,6 +254,8 @@ async function buildPerf(existingAugustLiteral) {
   const avgCol = requireCol(header, "AVERAGE CHECK", { mode: "exact" }, sheetLabel);
   const callsCol = requireCol(header, "Calls Handled", { mode: "contains", exclude: "previous" }, sheetLabel);
   const convCol = requireCol(header, "Conversion %", { mode: "contains", exclude: "previous" }, sheetLabel);
+  const salesCol = requireCol(header, "Total Sales", { mode: "contains", exclude: "previous" }, sheetLabel);
+  const salesPrevCol = requireCol(header, "Total Sales Previous Month", { mode: "contains" }, sheetLabel);
 
   // This table has several things above/below the real per-agent rows that
   // aren't agents: an "August" full-month recap row right at the top (its
@@ -299,6 +301,10 @@ async function buildPerf(existingAugustLiteral) {
       calls: esc(r[callsCol]).replace(/"/g, ""),
       callsNum: Number(esc(r[callsCol]).replace(/[^0-9.\-]/g, "")) || 0,
       conv: esc(r[convCol]),
+      sales: esc(r[salesCol]),
+      salesNum: Number(esc(r[salesCol]).replace(/[^0-9.\-]/g, "")) || 0,
+      salesPrev: esc(r[salesPrevCol]),
+      salesPrevNum: Number(esc(r[salesPrevCol]).replace(/[^0-9.\-]/g, "")) || 0,
     });
   }
   if (agentRows.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid agent rows parsed  -  refusing to publish.`);
@@ -311,10 +317,16 @@ async function buildPerf(existingAugustLiteral) {
     if (!prev) return (cur * 100) + "%"; // matches the sheet's own div-by-zero fallback (e.g. 38 -> "3800%")
     return Math.round(((cur - prev) / prev) * 100) + "%";
   }
+  function fmtCurrencyDiff(cur, prev) {
+    const d = cur - prev;
+    return (d >= 0 ? "+\u20B1" : "-\u20B1") + Math.abs(d).toLocaleString("en-US");
+  }
 
   const totalCur = agentRows.reduce((s, r) => s + r.cur, 0);
   const totalPrev = agentRows.reduce((s, r) => s + r.prev, 0);
   const totalCalls = agentRows.reduce((s, r) => s + r.callsNum, 0);
+  const totalSales = agentRows.reduce((s, r) => s + r.salesNum, 0);
+  const totalSalesPrev = agentRows.reduce((s, r) => s + r.salesPrevNum, 0);
   // Average check weighted by each agent's confirmed-order volume, and
   // conversion recomputed the same way the per-agent conversion values
   // check out (confirmed orders / calls handled)  -  both real aggregates of
@@ -328,12 +340,16 @@ async function buildPerf(existingAugustLiteral) {
     avg: "\u20B1" + totalAvg.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     calls: totalCalls.toLocaleString("en-US"),
     conv: totalConv + "%",
+    sales: "\u20B1" + totalSales.toLocaleString("en-US"),
+    salesPrev: "\u20B1" + totalSalesPrev.toLocaleString("en-US"),
+    salesDiff: fmtCurrencyDiff(totalSales, totalSalesPrev),
+    salesPct: fmtPct(totalSales, totalSalesPrev),
   };
 
   const rowsBody = agentRows
-    .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},diff:${jstr(r.diff)},pct:${jstr(r.pct)},avg:${jstr(r.avg)},calls:${jstr(r.calls)},conv:${jstr(r.conv)}}`)
+    .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},diff:${jstr(r.diff)},pct:${jstr(r.pct)},avg:${jstr(r.avg)},calls:${jstr(r.calls)},conv:${jstr(r.conv)},sales:${jstr(r.sales)},salesPrev:${jstr(r.salesPrev)}}`)
     .join(",\n");
-  const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},calls:${jstr(totalRow.calls)},conv:${jstr(totalRow.conv)}}`;
+  const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},calls:${jstr(totalRow.calls)},conv:${jstr(totalRow.conv)},sales:${jstr(totalRow.sales)},salesPrev:${jstr(totalRow.salesPrev)},salesDiff:${jstr(totalRow.salesDiff)},salesPct:${jstr(totalRow.salesPct)}}`;
 
   const paceBody = `{above:${paceAbove},below:${paceBelow}}`;
 
