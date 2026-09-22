@@ -127,6 +127,31 @@
   .badge-added{font-size:11px; background:var(--accent-soft); color:var(--accent); padding:1px 7px; border-radius:99px; margin-left:6px;}
 
   .mobilebar{display:none;}
+
+  /* ---- sidebar: who-am-I + search ---- */
+  .sidebox{margin:0 0 16px; padding:0 8px;}
+  .sidebox .label{display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--text-dim); padding:0 2px 6px;}
+  .sidebox input{width:100%; padding:8px 10px; border:1px solid var(--border); border-radius:7px; background:var(--surface); color:var(--text); font:inherit; font-size:13px;}
+  .sidebox input:focus{outline:2px solid var(--accent); outline-offset:1px;}
+  .whoami-row{display:flex; gap:6px; align-items:center;}
+  .whoami-row input{flex:1;}
+  .whoami-clear{flex:none; background:none; border:1px solid var(--border); border-radius:7px; width:32px; height:32px; color:var(--text-dim); cursor:pointer; font-size:13px;}
+  .whoami-clear:hover{color:var(--text); border-color:var(--text-dim);}
+  .whoami-hint{font-size:11.5px; color:var(--text-dim); margin-top:5px;}
+  .searchwrap{position:relative;}
+  .searchresults{position:absolute; left:0; right:0; top:calc(100% + 4px); background:var(--surface); border:1px solid var(--border); border-radius:8px; box-shadow:var(--shadow); max-height:320px; overflow-y:auto; z-index:30;}
+  .searchresults:empty{display:none;}
+  .searchresult{display:block; width:100%; text-align:left; background:none; border:none; border-bottom:1px solid var(--border); padding:9px 11px; cursor:pointer; font:inherit; color:var(--text);}
+  .searchresult:last-child{border-bottom:none;}
+  .searchresult:hover{background:var(--surface-2);}
+  .searchresult .rtitle{font-size:12.5px; font-weight:800; color:var(--accent); margin-bottom:2px;}
+  .searchresult .rsnippet{font-size:12px; color:var(--text-dim); line-height:1.4;}
+  .searchresult .rsnippet mark{background:var(--accent-soft); color:var(--accent); font-weight:700; border-radius:2px;}
+  .searchresult.empty{color:var(--text-dim); cursor:default; font-size:12.5px;}
+  .searchresult.empty:hover{background:none;}
+
+  tr.own-row td{background:var(--accent-soft)!important; font-weight:700; box-shadow:inset 3px 0 0 var(--accent);}
+
   @media (max-width:860px){
     #app{display:block;}
     .side{position:fixed; inset:0 auto 0 0; transform:translateX(-100%); transition:transform .2s ease; z-index:20; width:78vw; max-width:280px; box-shadow:var(--shadow);}
@@ -138,6 +163,9 @@
     .scrim.show{display:block;}
     .main{padding:18px 16px 50px;}
     .pagehead h1{font-size:22px;}
+    /* 16px stops iOS Safari from auto-zooming the page when a field is
+       focused  -  the desktop size (13.5px) is kept everywhere else. */
+    .formrow input, .formrow select, .sidebox input{font-size:16px;}
   }
 </style>
 
@@ -145,14 +173,36 @@
 
 <script id="page-script">
 var ACTIVE = "ranking";
+// "Remember me": the agent's own name, kept in this browser only (localStorage),
+// used to highlight their own row in Ranking & Score and pre-fill "Your name"
+// fields on the Leave / Day-off / Referral forms. Wrapped in try/catch since
+// localStorage can throw (private browsing, locked-down browser settings) -
+// the site just falls back to no name remembered in that case.
+function loadAgentName(){
+  try { return localStorage.getItem('cd_agent_name') || ""; } catch (e) { return ""; }
+}
+function saveAgentName(name){
+  try { localStorage.setItem('cd_agent_name', name); } catch (e) { /* ignore  -  storage unavailable */ }
+}
+var AGENT_NAME = loadAgentName();
+var DOC_CLICK_BOUND = false;
 /* Paste your deployed Google Apps Script Web App URL below (ends in /exec) to make
    the "Add a referral" form save straight to the Manual Callback sheet tab.
    Leave it blank to keep the form working locally only (not saved to the sheet). */
 var REFERRAL_INTAKE_URL = "https://script.google.com/macros/s/AKfycbwQSJ0rxRbLTxor0QNww0n9LIWoWBgBSVz9C9n-0B2CKLeSH7Q1cOXvv2JAwNbSuTt0/exec";
+/* Same Web App URL as above, also used to save the Leave Request and
+   Day-off Request forms straight to the shared sheet. It's the same
+   deployment (one Apps Script project handles all three forms), so this
+   will normally just match REFERRAL_INTAKE_URL above  -  kept as its own
+   variable in case they're ever split into separate deployments later. */
+var INTAKE_URL = REFERRAL_INTAKE_URL;
 /*AUTO-DAYOFF-START*/
 var DAYOFF_STATE = {"dayOffRequests":[]};
 /*AUTO-DAYOFF-END*/
 var LEAVE_STATE = {"leaveRequests":[{"name":"Angelo","start":"Oct 1","end":"Oct 10","reason":"Birthday ng langgam ko","added":false},{"name":"Lanlie","start":"Oct 1","end":"Oct 3","reason":"Father's bday and school program","added":false},{"name":"Joyce","start":"","end":"","reason":"Uuwi po ng province for personal matters","added":false},{"name":"Carmina","start":"","end":"","reason":"Family reunion sa province","added":false},{"name":"Jasmin","start":"Oct 5","end":"Oct 7","reason":"Family gathering","added":false}]};
+/*AUTO-UPDATED-START*/
+var LAST_UPDATED_ISO = "2026-09-16T00:00:00.000Z";
+/*AUTO-UPDATED-END*/
 
 var LATE_LOG = [
   {agent:"Filipina Bonifacio",date:"Sept 9",count:1},
@@ -167,90 +217,70 @@ var LATE_LOG = [
 
 /*AUTO-RANKING-START*/
 var RANKING = [
-  {agent:"Filipina Bonifacio",score:20,conv:"12.90%",total:54.9,rank:8},
-  {agent:"Merly Palomares",score:30,conv:"15.71%",total:74.9,rank:4},
-  {agent:"Mary Fontanilla",score:35,conv:"24.48%",total:100,rank:1},
-  {agent:"Dhanica Dadoya",score:26,conv:"18.57%",total:75.1,rank:3},
-  {agent:"Jubel Siagan",score:14,conv:"24.14%",total:69.3,rank:5},
-  {agent:"Sharon SanJuan",score:32,conv:"19.05%",total:84.6,rank:2},
-  {agent:"Joyce Malapitan",score:19,conv:"16.81%",total:61.5,rank:7},
-  {agent:"Marianne Visda",score:10,conv:"12.50%",total:39.8,rank:10},
-  {agent:"Lanlie Mayor",score:11,conv:"8.46%",total:33,rank:14},
-  {agent:"Christian Tad-y",score:10,conv:"10.10%",total:34.9,rank:13},
-  {agent:"Reynalyn Roco",score:14,conv:"20.59%",total:62.1,rank:6},
-  {agent:"Carmina Fernandez",score:8,conv:"7.55%",total:26.8,rank:18},
-  {agent:"John Jamero",score:9,conv:"11.39%",total:36.1,rank:11},
-  {agent:"Raysan Garganta",score:8,conv:"10.13%",total:32.1,rank:15},
-  {agent:"Jasmin Aruta",score:16,conv:"10.32%",total:43.9,rank:9},
-  {agent:"Trina Idaloy",score:7,conv:"7.45%",total:25.2,rank:19},
-  {agent:"Bhea Cuenca",score:9,conv:"11.25%",total:35.8,rank:12},
-  {agent:"Jonaliza Guevarra",score:7,conv:"10.61%",total:31.7,rank:16},
-  {agent:"Karen Dilig",score:9,conv:"7.56%",total:28.3,rank:17}
+  {agent:"Joyce Malapitan",score:24,conv:"16.44%",total:92.9,rank:1},
+  {agent:"Mary Fontanilla",score:28,conv:"10.37%",total:81.5,rank:2},
+  {agent:"Merly Palomares",score:24,conv:"12.57%",total:81.1,rank:3},
+  {agent:"Dhanica Dadoya",score:26,conv:"11.40%",total:81.1,rank:3},
+  {agent:"Jubel Siagan",score:14,conv:"14.43%",total:68.9,rank:5},
+  {agent:"Sharon SanJuan",score:19,conv:"11.11%",total:67.7,rank:6},
+  {agent:"Jonaliza Guevarra",score:18,conv:"10.59%",total:64.4,rank:7},
+  {agent:"Reynalyn Roco",score:15,conv:"10.42%",total:58.5,rank:8},
+  {agent:"Christian Tad-y",score:16,conv:"8.12%",total:53.3,rank:9},
+  {agent:"Filipina Bonifacio",score:15,conv:"8.06%",total:51.3,rank:10},
+  {agent:"Marianne Visda",score:13,conv:"6.84%",total:44,rank:11},
+  {agent:"Raysan Garganta",score:12,conv:"6.98%",total:42.7,rank:12},
+  {agent:"Trina Idaloy",score:11,conv:"5.14%",total:35.3,rank:13},
+  {agent:"Karen Dilig",score:9,conv:"4.05%",total:28.4,rank:14},
+  {agent:"Carmina Fernandez",score:7,conv:"4.90%",total:27.4,rank:15},
+  {agent:"Jasmin Aruta",score:7,conv:"3.93%",total:24.5,rank:16},
+  {agent:"John Jamero",score:5,conv:"3.79%",total:20.5,rank:17},
+  {agent:"Bhea Cuenca",score:4,conv:"2.80%",total:15.7,rank:18},
+  {agent:"Lanlie Mayor",score:4,conv:"2.70%",total:15.4,rank:19}
 ].sort(function(a,b){return a.rank-b.rank;});
 /*AUTO-RANKING-END*/
 
 /*AUTO-PERF-START*/
 var PERF = {
   rows:[
-    {a:"Jubel Siagan",cur:44,prev:31,diff:"+13",pct:"42%",avg:"\u20b13,114.43",calls:"191",conv:"23%"},
-    {a:"Filipina Bonifacio",cur:40,prev:55,diff:"-15",pct:"-27%",avg:"\u20b12,802.93",calls:"364",conv:"11%"},
-    {a:"Sharon SanJuan",cur:65,prev:40,diff:"+25",pct:"63%",avg:"\u20b12,773.11",calls:"414",conv:"16%"},
-    {a:"Christian Tad-y",cur:30,prev:24,diff:"+6",pct:"25%",avg:"\u20b12,696.93",calls:"361",conv:"8%"},
-    {a:"Merly Palomares",cur:69,prev:66,diff:"+3",pct:"5%",avg:"\u20b13,022.67",calls:"449",conv:"15%"},
-    {a:"Marianne Visda",cur:38,prev:35,diff:"+3",pct:"9%",avg:"\u20b12,766.71",calls:"311",conv:"12%"},
-    {a:"Joyce Malapitan",cur:59,prev:35,diff:"+24",pct:"69%",avg:"\u20b12,495.47",calls:"287",conv:"21%"},
-    {a:"Lanlie Mayor",cur:22,prev:29,diff:"-7",pct:"-24%",avg:"\u20b12,372.86",calls:"349",conv:"6%"},
-    {a:"Carmina Fernandez",cur:20,prev:23,diff:"-3",pct:"-13%",avg:"\u20b12,720.85",calls:"317",conv:"6%"},
-    {a:"Raysan Garganta",cur:28,prev:18,diff:"+10",pct:"56%",avg:"\u20b12,711.43",calls:"299",conv:"9%"},
-    {a:"Trina Idaloy",cur:22,prev:19,diff:"+3",pct:"16%",avg:"\u20b12,668.09",calls:"268",conv:"8%"},
-    {a:"Mary Fontanilla",cur:89,prev:91,diff:"-2",pct:"-2%",avg:"\u20b12,631.16",calls:"488",conv:"18%"},
-    {a:"John Jamero",cur:16,prev:18,diff:"-2",pct:"-11%",avg:"\u20b12,899.94",calls:"203",conv:"8%"},
-    {a:"Reynalyn Roco",cur:40,prev:30,diff:"+10",pct:"33%",avg:"\u20b13,046.93",calls:"181",conv:"22%"},
-    {a:"Dhanica Dadoya",cur:79,prev:52,diff:"+27",pct:"52%",avg:"\u20b12,340.47",calls:"526",conv:"15%"},
-    {a:"Jasmin Aruta",cur:36,prev:28,diff:"+8",pct:"29%",avg:"\u20b12,737.61",calls:"327",conv:"11%"},
-    {a:"Karen Dilig",cur:36,prev:0,diff:"+36",pct:"3600%",avg:"\u20b12,948.44",calls:"429",conv:"8%"},
-    {a:"Jonaliza Guevarra",cur:38,prev:0,diff:"+38",pct:"3800%",avg:"\u20b13,041.11",calls:"306",conv:"12%"},
-    {a:"Bhea Cuenca",cur:16,prev:0,diff:"+16",pct:"1600%",avg:"\u20b12,752.25",calls:"209",conv:"8%"}
+    {a:"Mary Fontanilla",cur:71,prev:58,diff:"+13",pct:"22%",avg:"\u20B12,533.96",calls:447,conv:"16%"},
+    {a:"Merly Palomares",cur:48,prev:39,diff:"+9",pct:"23%",avg:"\u20B12,926.33",calls:330,conv:"15%"},
+    {a:"Sharon SanJuan",cur:44,prev:26,diff:"+18",pct:"69%",avg:"\u20B12,942.02",calls:323,conv:"14%"},
+    {a:"Dhanica Dadoya",cur:50,prev:35,diff:"+15",pct:"43%",avg:"\u20B12,376.84",calls:385,conv:"13%"},
+    {a:"Jonaliza Guevarra",cur:29,prev:0,diff:"+29",pct:"2900%",avg:"\u20B12,682.76",calls:244,conv:"12%"},
+    {a:"Reynalyn Roco",cur:26,prev:19,diff:"+7",pct:"37%",avg:"\u20B12,877.54",calls:136,conv:"19%"},
+    {a:"Christian Tad-y",cur:26,prev:21,diff:"+5",pct:"24%",avg:"\u20B12,582.23",calls:328,conv:"8%"},
+    {a:"Jubel Siagan",cur:39,prev:24,diff:"+15",pct:"63%",avg:"\u20B12,975.62",calls:184,conv:"21%"},
+    {a:"Joyce Malapitan",cur:39,prev:31,diff:"+8",pct:"26%",avg:"\u20B12,413.15",calls:204,conv:"19%"},
+    {a:"Jasmin Aruta",cur:26,prev:14,diff:"+12",pct:"86%",avg:"\u20B12,578.27",calls:263,conv:"10%"},
+    {a:"Karen Dilig",cur:31,prev:0,diff:"+31",pct:"3100%",avg:"\u20B12,837.29",calls:330,conv:"9%"},
+    {a:"Marianne Visda",cur:31,prev:29,diff:"+2",pct:"7%",avg:"\u20B12,528.39",calls:294,conv:"11%"},
+    {a:"Filipina Bonifacio",cur:30,prev:35,diff:"-5",pct:"-14%",avg:"\u20B12,758.97",calls:316,conv:"9%"},
+    {a:"Trina Idaloy",cur:16,prev:11,diff:"+5",pct:"45%",avg:"\u20B12,513.56",calls:240,conv:"7%"},
+    {a:"Raysan Garganta",cur:25,prev:11,diff:"+14",pct:"127%",avg:"\u20B12,638.64",calls:273,conv:"9%"},
+    {a:"Bhea Cuenca",cur:10,prev:0,diff:"+10",pct:"1000%",avg:"\u20B12,500.00",calls:140,conv:"7%"},
+    {a:"John Jamero",cur:8,prev:10,diff:"-2",pct:"-20%",avg:"\u20B12,586.50",calls:143,conv:"6%"},
+    {a:"Carmina Fernandez",cur:12,prev:16,diff:"-4",pct:"-25%",avg:"\u20B12,675.50",calls:234,conv:"5%"},
+    {a:"Lanlie Mayor",cur:12,prev:25,diff:"-13",pct:"-52%",avg:"\u20B12,514.75",calls:248,conv:"5%"}
   ],
-  total:{cur:787,prev:594,diff:"+193",pct:"32%",avg:"\u20b12,749.84",calls:"6,279",conv:"13%"},
-  pace:{above:0,below:0},
+  total:{cur:573,prev:404,diff:"+169",pct:"42%",avg:"\u20B12,781.64",calls:"5,062",conv:"11%"},
+  pace:{above:11,below:5},
   august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"\u20B12,514.73",avgPrev:"\u20B12,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
 };
 /*AUTO-PERF-END*/
 
 /*AUTO-GIFTS-START*/
 var GIFTS = [
-  ["Arti-flex","Easy Go","Easy Go"],
-  ["Optiheal","Easy Go","Easy Go"],
-  ["Footurel","Easy Go","Easy Go"],
-  ["Variflex","Easy Go","Easy Go"],
-  ["D-Up","Prostaman","Prostaman"],
-  ["Vitaman Plus","Prostaman","Prostaman"],
-  ["Prostaman","Easy Go","Easy Go"],
-  ["Neo Card Potency","Prostaman","Prostaman"],
-  ["TensoLumen","Easy Go","Variflex"],
-  ["Neocardia","Easy Go","Variflex"],
-  ["Glucofortis","Footurel Gel","Variflex"],
-  ["Ketonica","Variflex","Retinlift"],
-  ["Wellatox","Variflex","Retinlift"],
-  ["Rootera","Variflex","Retinlift"],
-  ["Retinlift","Footurel Gel","Variflex"],
-  ["Easy Go","Easy Go","Easy Go"]
+  ["Easy Go Max","Easy Go","Easy Go"],["Arti-flex","Easy Go","Easy Go"],["Optiheal","Easy Go","Easy Go"],
+  ["Footurel","Easy Go","Easy Go"],["Variflex","Easy Go","Easy Go"],["D-Up","Prostaman","Prostaman"],
+  ["Vitaman Plus","Prostaman","Prostaman"],["Prostaman","Easy Go","Easy Go"],["Neo Card Potency","Prostaman","Prostaman"],
+  ["TensoLumen","Easy Go","Variflex"],["Neocardia","Easy Go","Variflex"],["Glucofortis","Footurel Gel","Variflex"],
+  ["Ketonica","Variflex","Retinlift"],["Wellatox","Variflex","Retinlift"],["Rootera","Variflex","Retinlift"],
+  ["Retinlift","Footurel Gel","Variflex"],["Easy Go","Easy Go","Easy Go"]
 ];
 /*AUTO-GIFTS-END*/
 
 /*AUTO-PRICING-START*/
-var PRICING = [
-  ["Main Product","1","1990","1,035","299"],
-  ["Main Product","5","2,745","1,650",""],
-  ["Main Product","3","2,187","1,320",""],
-  ["Main Product","2","1,640","990",""],
-  ["Main Product","1","990","590",""],
-  ["Main Product","5","2,275","1,500",""],
-  ["Main Product","3","1,515","999",""],
-  ["Main Product","2","1,140","830",""],
-  ["Main Product","1","690","419",""]
-];
+var PRICING = [];
 /*AUTO-PRICING-END*/
 
 var REDELIVERY = {
@@ -295,6 +325,27 @@ var REFERRALS = [
 ];
 
 function esc(s){return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+function norm(s){return String(s==null?"":s).trim().toLowerCase();}
+function agentDatalistOptions(){
+  return RANKING.map(function(r){return '<option value="'+esc(r.agent)+'">';}).join("");
+}
+// Turns the ISO timestamp the refresh script stamps in (always UTC) into a
+// friendly "Updated <date>, <time>" string in the viewer's own local time,
+// plus a small badge for pages driven straight from the sheet.
+function formatLastUpdated(){
+  try {
+    var d = new Date(LAST_UPDATED_ISO);
+    if (isNaN(d.getTime())) return "";
+    var dateStr = d.toLocaleDateString(undefined, {month:"short", day:"numeric"});
+    var timeStr = d.toLocaleTimeString(undefined, {hour:"numeric", minute:"2-digit"});
+    return dateStr + ", " + timeStr;
+  } catch (e) { return ""; }
+}
+function freshnessNote(){
+  var when = formatLastUpdated();
+  if (!when) return "";
+  return '<div class="sub" style="margin-top:-10px;margin-bottom:16px;">\uD83D\uDD04 Synced from the Google Sheet \u2014 last updated '+esc(when)+'.</div>';
+}
 function pillPct(p){
   var neg = /^-/.test(p);
   return '<span class="pill '+(neg?"down":"up")+'">'+esc(p)+'</span>';
@@ -331,12 +382,17 @@ var SECTIONS = {
 };
 
 function rankingView(){
+  var myName = norm(AGENT_NAME);
   var rows = RANKING.map(function(r,i){
     var rankCell = r.rank===1 ? '<span class="rank1">#1</span>' : (r.rank===2 ? '<span class="rank2">#2</span>' : ("#"+r.rank));
-    var rowClass = r.rank===1 ? ' class="top1"' : (r.rank===2 ? ' class="top2"' : '');
+    var classes = [];
+    if (r.rank===1) classes.push("top1"); else if (r.rank===2) classes.push("top2");
+    if (myName && norm(r.agent)===myName) classes.push("own-row");
+    var rowClass = classes.length ? ' class="'+classes.join(" ")+'"' : '';
     return '<tr'+rowClass+'><td class="num">'+rankCell+'</td><td>'+esc(r.agent)+'</td><td class="num">'+r.score+'</td><td class="num">'+esc(r.conv)+'</td><td class="num">'+r.total+'</td></tr>';
   }).join("");
   return '' +
+  freshnessNote() +
   '<div class="card">' +
     '<h2>Weekly ranking</h2><div class="sub">Sorted by rank. The top 2 by confirmed orders are highlighted.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th class="num">Rank</th><th>Agent</th><th class="num">Confirmed Orders</th><th class="num">Conversion %</th><th class="num">Total Score</th></tr></thead><tbody>'+rows+'</tbody></table></div>' +
@@ -349,6 +405,7 @@ function performanceView(){
   }).join("");
   var t = PERF.total, a = PERF.august, p = PERF.pace;
   return '' +
+  freshnessNote() +
   '<div class="tiles">' +
     '<div class="tile"><div class="k">Confirmed Orders (MTD)</div><div class="v">'+t.cur+'</div><div class="d up">'+t.diff+' vs. same date last month ('+t.pct+')</div></div>' +
     '<div class="tile"><div class="k">Average Check</div><div class="v">'+esc(t.avg)+'</div><div class="d">vs. \u20B12,627.10 last month</div></div>' +
@@ -405,7 +462,7 @@ function leaveTrackerView(){
     '<h3 style="margin-top:18px;font-size:14px;">Add your request</h3>' +
     '<form id="leaveform" autocomplete="off">' +
       '<div class="formrow">' +
-        '<div><label for="l-name">Your name</label><input id="l-name" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
+        '<div><label for="l-name">Your name</label><input id="l-name" required maxlength="60" placeholder="e.g. Sharon SanJuan" value="'+esc(AGENT_NAME)+'"></div>' +
         '<div><label for="l-start">Start date</label><input id="l-start" maxlength="20" placeholder="e.g. Oct 12"></div>' +
         '<div><label for="l-end">End date</label><input id="l-end" maxlength="20" placeholder="e.g. Oct 14"></div>' +
       '</div>' +
@@ -422,7 +479,7 @@ function leaveTrackerView(){
     '<h3 style="margin-top:18px;font-size:14px;">Add your request</h3>' +
     '<form id="doform" autocomplete="off">' +
       '<div class="formrow">' +
-        '<div><label for="do-name">Your name</label><input id="do-name" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
+        '<div><label for="do-name">Your name</label><input id="do-name" required maxlength="60" placeholder="e.g. Sharon SanJuan" value="'+esc(AGENT_NAME)+'"></div>' +
         '<div><label for="do-off1">Off Day 1</label><select id="do-off1"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option>Sunday</option></select></div>' +
         '<div><label for="do-off2">Off Day 2</label><select id="do-off2"><option>Monday</option><option>Tuesday</option><option>Wednesday</option><option>Thursday</option><option>Friday</option><option>Saturday</option><option selected>Sunday</option></select></div>' +
         '<div><label for="do-shift">Shift</label><select id="do-shift"><option>Morning</option><option>Afternoon</option><option>Evening</option></select></div>' +
@@ -457,7 +514,8 @@ function giftsView(){
   } else {
     priceCard = '<div class="card"><h2>Pricing tiers</h2><div class="sub" style="margin-bottom:0">Pricing hasn\u2019t synced from the sheet yet \u2014 it\u2019ll appear here after the next refresh.</div></div>';
   }
-  return '<div class="card"><h2>Free gift by product</h2><div class="sub">Offer the matching free gift based on the customer\u2019s product and gender.</div>' +
+  return freshnessNote() +
+    '<div class="card"><h2>Free gift by product</h2><div class="sub">Offer the matching free gift based on the customer\u2019s product and gender.</div>' +
     '<div class="tablewrap"><table class="grid"><thead><tr><th>Product</th><th>Male Gift</th><th>Female Gift</th></tr></thead><tbody>'+rows+'</tbody></table></div></div>' +
     priceCard;
 }
@@ -480,7 +538,7 @@ function callbacksView(){
     '<h3 style="margin-top:18px;font-size:14px;">Add a referral</h3>' +
     '<form id="refform" autocomplete="off">' +
       '<div class="formrow">' +
-        '<div><label for="rf-agent">Your name</label><input id="rf-agent" required maxlength="60" placeholder="e.g. Sharon SanJuan"></div>' +
+        '<div><label for="rf-agent">Your name</label><input id="rf-agent" required maxlength="60" placeholder="e.g. Sharon SanJuan" value="'+esc(AGENT_NAME)+'"></div>' +
         '<div><label for="rf-prevclient">Referred by (previous client)</label><input id="rf-prevclient" required maxlength="60" placeholder="e.g. Jessie Mangay"></div>' +
         '<div><label for="rf-name">New contact name</label><input id="rf-name" required maxlength="60" placeholder="e.g. Ganie Raganas Mangay"></div>' +
       '</div>' +
@@ -739,21 +797,37 @@ function redeliveryAlgoView(){
   '</div>';
 }
 
+var VIEW_FNS = {
+  ranking: rankingView, performance: performanceView,
+  leaveTracker: leaveTrackerView,
+  remarketing: remarketingView, notordered: notOrderedView, redeliveryAlgo: redeliveryAlgoView,
+  gifts: giftsView, redelivery: redeliveryView, callbacks: callbacksView
+};
+
 function renderApp(state){
   var active = ACTIVE || "ranking";
   var s = SECTIONS[active];
-  var viewHtml = {
-    ranking: rankingView, performance: performanceView,
-    leaveTracker: leaveTrackerView,
-    remarketing: remarketingView, notordered: notOrderedView, redeliveryAlgo: redeliveryAlgoView,
-    gifts: giftsView, redelivery: redeliveryView, callbacks: callbacksView
-  }[active]();
+  var viewHtml = VIEW_FNS[active]();
 
   return '' +
   '<div class="mobilebar"><button id="navtoggle" aria-label="Open menu">\u2630</button><strong>'+esc(SECTIONS[active].title)+'</strong></div>' +
   '<div class="scrim" id="scrim"></div>' +
   '<aside class="side" id="sidenav">' +
     '<div class="brand"><div class="mark">\u260E\uFE0F</div><div class="txt"><strong>Confirmation Desk</strong><span>Team ops hub</span></div></div>' +
+    '<div class="sidebox">' +
+      '<span class="label">Your name</span>' +
+      '<div class="whoami-row">' +
+        '<input id="who-input" list="who-list" maxlength="60" placeholder="e.g. Sharon SanJuan" value="'+esc(AGENT_NAME)+'">' +
+        '<button type="button" class="whoami-clear" id="who-clear" title="Clear" aria-label="Clear your name">\u2715</button>' +
+      '</div>' +
+      '<datalist id="who-list">'+agentDatalistOptions()+'</datalist>' +
+      '<div class="whoami-hint">Remembered on this device \u2014 highlights your row in Ranking & fills your name on forms.</div>' +
+    '</div>' +
+    '<div class="sidebox searchwrap">' +
+      '<span class="label">Search</span>' +
+      '<input id="site-search" autocomplete="off" placeholder="\uD83D\uDD0D Search scripts, reasons, pricing\u2026">' +
+      '<div class="searchresults" id="search-results"></div>' +
+    '</div>' +
     '<nav>'+renderNav(active, SECTIONS)+'</nav>' +
   '</aside>' +
   '<main class="main">' +
@@ -762,11 +836,79 @@ function renderApp(state){
   '</main>';
 }
 
-function setActive(id){
+function setActive(id, searchTerm){
   ACTIVE = id;
   document.getElementById('app').innerHTML = renderApp();
   attachHandlers();
   document.getElementById('app').scrollIntoView({block:'start'});
+  // If we landed here from a search result, try to scroll the browser's
+  // own text search to the first match so it's not just "somewhere on this
+  // long page"  -  window.find is non-standard but works in every
+  // Chromium/Firefox build agents are likely using; if it's unsupported
+  // anywhere, this just quietly does nothing and the page still navigated.
+  if (searchTerm && typeof window.find === 'function'){
+    setTimeout(function(){
+      try { window.find(searchTerm, false, false, true, false, true, false); } catch (e) { /* ignore */ }
+    }, 60);
+  }
+}
+
+// ---- site search ----
+// Built once, lazily, by rendering every section's view function and
+// stripping its HTML down to plain text. Views are pure functions of the
+// global state (RANKING, PERF, LEAVE_STATE, ...) so calling them here for
+// indexing has no side effects on ACTIVE or the currently visible page.
+var SEARCH_INDEX = null;
+function stripTags(html){
+  return String(html)
+    .replace(/<[^>]*>/g," ")
+    .replace(/&nbsp;/g," ").replace(/&amp;/g,"&").replace(/&lt;/g,"<").replace(/&gt;/g,">").replace(/&#39;/g,"'").replace(/&quot;/g,'"')
+    .replace(/\s+/g," ").trim();
+}
+function buildSearchIndex(){
+  if (SEARCH_INDEX) return SEARCH_INDEX;
+  SEARCH_INDEX = Object.keys(VIEW_FNS).map(function(id){
+    var html = "";
+    try { html = VIEW_FNS[id](); } catch (e) { html = ""; }
+    return { id: id, title: SECTIONS[id].label, text: stripTags(html) };
+  });
+  return SEARCH_INDEX;
+}
+function searchSnippet(text, query){
+  var lower = text.toLowerCase();
+  var at = lower.indexOf(query.toLowerCase());
+  if (at === -1) return "";
+  var start = Math.max(0, at - 45);
+  var end = Math.min(text.length, at + query.length + 65);
+  var snippet = (start > 0 ? "\u2026" : "") + text.slice(start, end) + (end < text.length ? "\u2026" : "");
+  var re = new RegExp("(" + query.replace(/[.*+?^${}()|[\]\\]/g,"\\$&") + ")", "ig");
+  return esc(snippet).replace(re, "<mark>$1</mark>");
+}
+function renderSearchResults(query, container){
+  query = query.trim();
+  if (query.length < 2){ container.innerHTML = ""; return; }
+  var index = buildSearchIndex();
+  var matches = index
+    .filter(function(entry){ return entry.text.toLowerCase().indexOf(query.toLowerCase()) !== -1; })
+    .slice(0, 8);
+  if (!matches.length){
+    container.innerHTML = '<div class="searchresult empty">No matches on the site for \u201C'+esc(query)+'\u201D.</div>';
+    return;
+  }
+  container.innerHTML = matches.map(function(m){
+    return '<button type="button" class="searchresult" data-jump="'+esc(m.id)+'" data-term="'+esc(query)+'">' +
+      '<div class="rtitle">'+esc(m.title)+'</div>' +
+      '<div class="rsnippet">'+searchSnippet(m.text, query)+'</div>' +
+    '</button>';
+  }).join("");
+  var btns = container.querySelectorAll('[data-jump]');
+  for (var i=0;i<btns.length;i++){
+    btns[i].addEventListener('click', function(e){
+      var id = e.currentTarget.getAttribute('data-jump');
+      var term = e.currentTarget.getAttribute('data-term');
+      setActive(id, term);
+    });
+  }
 }
 
 function attachHandlers(){
@@ -781,6 +923,79 @@ function attachHandlers(){
     toggle.addEventListener('click', function(){ side.classList.add('open'); scrim.classList.add('show'); });
     scrim.addEventListener('click', function(){ side.classList.remove('open'); scrim.classList.remove('show'); });
   }
+
+  var whoInput = document.getElementById('who-input');
+  var whoClear = document.getElementById('who-clear');
+  if (whoInput){
+    whoInput.addEventListener('keydown', function(e){ if (e.key === 'Enter'){ whoInput.blur(); } });
+    whoInput.addEventListener('change', function(){
+      AGENT_NAME = whoInput.value.trim();
+      saveAgentName(AGENT_NAME);
+      setActive(ACTIVE);
+    });
+  }
+  if (whoClear){
+    whoClear.addEventListener('click', function(){
+      AGENT_NAME = "";
+      saveAgentName("");
+      setActive(ACTIVE);
+    });
+  }
+
+  var searchInput = document.getElementById('site-search');
+  var searchResults = document.getElementById('search-results');
+  if (searchInput && searchResults){
+    searchInput.addEventListener('input', function(){ renderSearchResults(searchInput.value, searchResults); });
+    searchInput.addEventListener('keydown', function(e){ if (e.key === 'Escape'){ searchInput.value=''; searchResults.innerHTML=''; searchInput.blur(); } });
+  }
+  // Bound once on document (not per-render, since document persists across
+  // setActive() re-renders and re-binding here would stack up listeners) -
+  // reads the CURRENT search box/results from the DOM at click time instead
+  // of closing over the ones from whichever render first attached it.
+  if (!DOC_CLICK_BOUND){
+    DOC_CLICK_BOUND = true;
+    document.addEventListener('click', function(e){
+      var sr = document.getElementById('search-results');
+      var si = document.getElementById('site-search');
+      if (sr && !sr.contains(e.target) && e.target !== si) sr.innerHTML = '';
+    });
+  }
+
+  // Shared by the Day-off, Leave, and Referral forms: pushes the entry into
+  // its local array right away (so the table updates instantly for the
+  // person typing), then  -  if a Web App URL is configured  -  also POSTs it
+  // to the shared sheet, and swaps the status message once that finishes.
+  function submitToSheet(opts){
+    var submitBtn = document.getElementById(opts.submitId);
+    var msgId = opts.msgId;
+    submitBtn.disabled = true;
+    var msg = document.getElementById(msgId);
+    msg.textContent = 'Adding\u2026';
+    msg.className = 'savemsg';
+
+    var localOnlyMsg = 'Added to this list on your device. Note: this file isn\u2019t connected to a shared server, so this addition stays local to your browser \u2014 send a copy of what you typed to your supervisor to get it added for everyone.';
+    var savedMsg = opts.savedMsg || 'Added \u2014 and saved to the shared sheet.';
+    var failedMsg = 'Added to this list on your device, but saving to the shared sheet failed \u2014 please also send a copy of what you typed to your supervisor.';
+
+    function finish(text){
+      setActive(opts.viewId);
+      var m = document.getElementById(msgId);
+      if (m){ m.textContent = text; m.className = 'savemsg'; }
+    }
+
+    if (INTAKE_URL) {
+      fetch(INTAKE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify(opts.entry)
+      }).then(function(res){ return res.json ? res.json() : {}; })
+        .then(function(resp){ finish(resp && resp.status === 'ok' ? savedMsg : failedMsg); })
+        .catch(function(){ finish(failedMsg); });
+    } else {
+      setTimeout(function(){ finish(localOnlyMsg); }, 200);
+    }
+  }
+
   var doForm = document.getElementById('doform');
   if (doForm){
     doForm.addEventListener('submit', function(e){
@@ -788,6 +1003,7 @@ function attachHandlers(){
       var name = document.getElementById('do-name').value.trim();
       if (!name) return;
       var entry = {
+        type: 'dayoff',
         name: name,
         off1: document.getElementById('do-off1').value,
         off2: document.getElementById('do-off2').value,
@@ -795,17 +1011,11 @@ function attachHandlers(){
         reason: document.getElementById('do-reason').value.trim(),
         added: true
       };
-      DAYOFF_STATE.dayOffRequests.push(entry);
-      var submitBtn = document.getElementById('do-submit');
-      var msg = document.getElementById('do-msg');
-      submitBtn.disabled = true;
-      msg.textContent = 'Adding\u2026';
-      msg.className = 'savemsg';
-      setTimeout(function(){
-        setActive('leaveTracker');
-        var m = document.getElementById('do-msg');
-        if (m){ m.textContent = 'Added to this list on your device. Note: this file isn\u2019t connected to a shared server, so this addition stays local to your browser \u2014 send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
-      }, 200);
+      DAYOFF_STATE.dayOffRequests.push(entry); SEARCH_INDEX = null;
+      submitToSheet({
+        entry: entry, submitId: 'do-submit', msgId: 'do-msg', viewId: 'leaveTracker',
+        savedMsg: 'Added \u2014 and saved to the shared Day-off list.'
+      });
     });
   }
   var leaveForm = document.getElementById('leaveform');
@@ -816,23 +1026,18 @@ function attachHandlers(){
       var reason = document.getElementById('l-reason').value.trim();
       if (!name || !reason) return;
       var entry = {
+        type: 'leave',
         name: name,
         start: document.getElementById('l-start').value.trim(),
         end: document.getElementById('l-end').value.trim(),
         reason: reason,
         added: true
       };
-      LEAVE_STATE.leaveRequests.push(entry);
-      var submitBtn = document.getElementById('l-submit');
-      var msg = document.getElementById('l-msg');
-      submitBtn.disabled = true;
-      msg.textContent = 'Adding\u2026';
-      msg.className = 'savemsg';
-      setTimeout(function(){
-        setActive('leaveTracker');
-        var m = document.getElementById('l-msg');
-        if (m){ m.textContent = 'Added to this list on your device. Note: this file isn\u2019t connected to a shared server, so this addition stays local to your browser \u2014 send a copy of what you typed to your supervisor to get it added for everyone.'; m.className = 'savemsg'; }
-      }, 200);
+      LEAVE_STATE.leaveRequests.push(entry); SEARCH_INDEX = null;
+      submitToSheet({
+        entry: entry, submitId: 'l-submit', msgId: 'l-msg', viewId: 'leaveTracker',
+        savedMsg: 'Added \u2014 and saved to the shared Leave Requests list.'
+      });
     });
   }
   var refForm = document.getElementById('refform');
@@ -844,6 +1049,7 @@ function attachHandlers(){
       var name = document.getElementById('rf-name').value.trim();
       if (!agent || !prevClient || !name) return;
       var entry = {
+        type: 'referral',
         agent: agent,
         prevHash: document.getElementById('rf-hash').value.trim(),
         prevClient: prevClient,
@@ -854,34 +1060,11 @@ function attachHandlers(){
         product: document.getElementById('rf-product').value.trim(),
         added: true
       };
-      REFERRALS.push(entry);
-      var submitBtn = document.getElementById('rf-submit');
-      var msg = document.getElementById('rf-msg');
-      submitBtn.disabled = true;
-      msg.textContent = 'Adding\u2026';
-      msg.className = 'savemsg';
-
-      var localOnlyMsg = 'Added to this list on your device. Note: this file isn\u2019t connected to a shared server, so this addition stays local to your browser \u2014 send a copy of what you typed to your supervisor to get it added for everyone.';
-      var savedMsg = 'Added \u2014 and saved to the shared Manual Callback sheet.';
-      var failedMsg = 'Added to this list on your device, but saving to the shared sheet failed \u2014 please also send a copy of what you typed to your supervisor.';
-
-      function finish(text){
-        setActive('callbacks');
-        var m = document.getElementById('rf-msg');
-        if (m){ m.textContent = text; m.className = 'savemsg'; }
-      }
-
-      if (REFERRAL_INTAKE_URL) {
-        fetch(REFERRAL_INTAKE_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify(entry)
-        }).then(function(res){ return res.json ? res.json() : {}; })
-          .then(function(resp){ finish(resp && resp.status === 'ok' ? savedMsg : failedMsg); })
-          .catch(function(){ finish(failedMsg); });
-      } else {
-        setTimeout(function(){ finish(localOnlyMsg); }, 200);
-      }
+      REFERRALS.push(entry); SEARCH_INDEX = null;
+      submitToSheet({
+        entry: entry, submitId: 'rf-submit', msgId: 'rf-msg', viewId: 'callbacks',
+        savedMsg: 'Added \u2014 and saved to the shared Manual Callback sheet.'
+      });
     });
   }
 }
