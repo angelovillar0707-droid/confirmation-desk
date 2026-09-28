@@ -2,8 +2,9 @@ name: Refresh from Google Sheet
 
 on:
   schedule:
-    # 12:00 AM and 12:00 PM Manila time (UTC+8) = 16:00 and 04:00 UTC
-    - cron: "0 4,16 * * *"
+    # 6:00 AM, 12:00 PM, 6:00 PM, and 12:00 AM Manila time (UTC+8)
+    # = 22:00 (previous day), 04:00, 10:00, and 16:00 UTC
+    - cron: "0 4,10,16,22 * * *"
   workflow_dispatch: {}
 
 permissions:
