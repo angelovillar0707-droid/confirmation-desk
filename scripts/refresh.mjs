@@ -243,7 +243,7 @@ async function buildRanking() {
 async function buildPerf(existingAugustLiteral) {
   const sheetLabel = "Performance Update";
   const { rows, headerRowIdx } = await getValidatedSheetByGid(
-    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled", "Total Sales"], sheetLabel
+    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled", "Total Buyout", "Total Sales"], sheetLabel
   );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
@@ -254,6 +254,14 @@ async function buildPerf(existingAugustLiteral) {
   const avgCol = requireCol(header, "AVERAGE CHECK", { mode: "exact" }, sheetLabel);
   const callsCol = requireCol(header, "Calls Handled", { mode: "contains", exclude: "previous" }, sheetLabel);
   const convCol = requireCol(header, "Conversion %", { mode: "contains", exclude: "previous" }, sheetLabel);
+  // "Total Buyout" / "Previous Month Buyout": the original pair of currency
+  // columns from this tab (this used to be labeled "Total Sales" on the
+  // sheet before it was renamed to "Buyout" to make room for a genuinely
+  // separate "Total Sales" pair living next to Average Check  -  see below).
+  const buyoutCol = requireCol(header, "Total Buyout", { mode: "contains", exclude: "previous" }, sheetLabel);
+  const buyoutPrevCol = requireCol(header, "Previous Month Buyout", { mode: "contains" }, sheetLabel);
+  // "Total Sales" / "Total Sales Previous Month": a newer, separate pair of
+  // currency columns that live next to Average Check.
   const salesCol = requireCol(header, "Total Sales", { mode: "contains", exclude: "previous" }, sheetLabel);
   const salesPrevCol = requireCol(header, "Total Sales Previous Month", { mode: "contains" }, sheetLabel);
 
@@ -301,6 +309,10 @@ async function buildPerf(existingAugustLiteral) {
       calls: esc(r[callsCol]).replace(/"/g, ""),
       callsNum: Number(esc(r[callsCol]).replace(/[^0-9.\-]/g, "")) || 0,
       conv: esc(r[convCol]),
+      buyout: esc(r[buyoutCol]),
+      buyoutNum: Number(esc(r[buyoutCol]).replace(/[^0-9.\-]/g, "")) || 0,
+      buyoutPrev: esc(r[buyoutPrevCol]),
+      buyoutPrevNum: Number(esc(r[buyoutPrevCol]).replace(/[^0-9.\-]/g, "")) || 0,
       sales: esc(r[salesCol]),
       salesNum: Number(esc(r[salesCol]).replace(/[^0-9.\-]/g, "")) || 0,
       salesPrev: esc(r[salesPrevCol]),
@@ -325,6 +337,8 @@ async function buildPerf(existingAugustLiteral) {
   const totalCur = agentRows.reduce((s, r) => s + r.cur, 0);
   const totalPrev = agentRows.reduce((s, r) => s + r.prev, 0);
   const totalCalls = agentRows.reduce((s, r) => s + r.callsNum, 0);
+  const totalBuyout = agentRows.reduce((s, r) => s + r.buyoutNum, 0);
+  const totalBuyoutPrev = agentRows.reduce((s, r) => s + r.buyoutPrevNum, 0);
   const totalSales = agentRows.reduce((s, r) => s + r.salesNum, 0);
   const totalSalesPrev = agentRows.reduce((s, r) => s + r.salesPrevNum, 0);
   // Average check weighted by each agent's confirmed-order volume, and
@@ -340,6 +354,10 @@ async function buildPerf(existingAugustLiteral) {
     avg: "\u20B1" + totalAvg.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
     calls: totalCalls.toLocaleString("en-US"),
     conv: totalConv + "%",
+    buyout: "\u20B1" + totalBuyout.toLocaleString("en-US"),
+    buyoutPrev: "\u20B1" + totalBuyoutPrev.toLocaleString("en-US"),
+    buyoutDiff: fmtCurrencyDiff(totalBuyout, totalBuyoutPrev),
+    buyoutPct: fmtPct(totalBuyout, totalBuyoutPrev),
     sales: "\u20B1" + totalSales.toLocaleString("en-US"),
     salesPrev: "\u20B1" + totalSalesPrev.toLocaleString("en-US"),
     salesDiff: fmtCurrencyDiff(totalSales, totalSalesPrev),
@@ -347,9 +365,9 @@ async function buildPerf(existingAugustLiteral) {
   };
 
   const rowsBody = agentRows
-    .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},diff:${jstr(r.diff)},pct:${jstr(r.pct)},avg:${jstr(r.avg)},calls:${jstr(r.calls)},conv:${jstr(r.conv)},sales:${jstr(r.sales)},salesPrev:${jstr(r.salesPrev)}}`)
+    .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},diff:${jstr(r.diff)},pct:${jstr(r.pct)},avg:${jstr(r.avg)},calls:${jstr(r.calls)},conv:${jstr(r.conv)},buyout:${jstr(r.buyout)},buyoutPrev:${jstr(r.buyoutPrev)},sales:${jstr(r.sales)},salesPrev:${jstr(r.salesPrev)}}`)
     .join(",\n");
-  const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},calls:${jstr(totalRow.calls)},conv:${jstr(totalRow.conv)},sales:${jstr(totalRow.sales)},salesPrev:${jstr(totalRow.salesPrev)},salesDiff:${jstr(totalRow.salesDiff)},salesPct:${jstr(totalRow.salesPct)}}`;
+  const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},calls:${jstr(totalRow.calls)},conv:${jstr(totalRow.conv)},buyout:${jstr(totalRow.buyout)},buyoutPrev:${jstr(totalRow.buyoutPrev)},buyoutDiff:${jstr(totalRow.buyoutDiff)},buyoutPct:${jstr(totalRow.buyoutPct)},sales:${jstr(totalRow.sales)},salesPrev:${jstr(totalRow.salesPrev)},salesDiff:${jstr(totalRow.salesDiff)},salesPct:${jstr(totalRow.salesPct)}}`;
 
   const paceBody = `{above:${paceAbove},below:${paceBelow}}`;
 
