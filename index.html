@@ -208,11 +208,11 @@ var REFERRAL_INTAKE_URL = "https://script.google.com/macros/s/AKfycbwQSJ0rxRbLTx
    variable in case they're ever split into separate deployments later. */
 var INTAKE_URL = REFERRAL_INTAKE_URL;
 /*AUTO-DAYOFF-START*/
-var DAYOFF_STATE = {"dayOffRequests":[]};
+var DAYOFF_STATE = {"dayOffRequests":[{"name":"Mary","off1":"Sat","off2":"Sun","shift":"Morning","reason":"Need to do something","added":false},{"name":"Carmina","off1":"Tue","off2":"Wed","shift":"Afternoon","reason":"Therapy","added":false}]};
 /*AUTO-DAYOFF-END*/
 var LEAVE_STATE = {"leaveRequests":[{"name":"Angelo","start":"Oct 1","end":"Oct 10","reason":"Birthday ng langgam ko","added":false},{"name":"Lanlie","start":"Oct 1","end":"Oct 3","reason":"Father's bday and school program","added":false},{"name":"Joyce","start":"","end":"","reason":"Uuwi po ng province for personal matters","added":false},{"name":"Carmina","start":"","end":"","reason":"Family reunion sa province","added":false},{"name":"Jasmin","start":"Oct 5","end":"Oct 7","reason":"Family gathering","added":false}]};
 /*AUTO-UPDATED-START*/
-var LAST_UPDATED_ISO = "2026-10-01T05:36:14.451Z";
+var LAST_UPDATED_ISO = "2026-10-01T10:15:34.006Z";
 /*AUTO-UPDATED-END*/
 
 var LATE_LOG = [
@@ -253,27 +253,27 @@ var RANKING = [
 /*AUTO-PERF-START*/
 var PERF = {
   rows:[
-    {a:"Jubel Siagan",cur:2,prev:6,avg:"\u20b13,099.00",buyout:"\u20b10",targetBuyout:"\u20b1145,000",buyoutDiff:"-\u20b1145,000",cross:1,crossTarget:25,crossDiff:"-24"},
-    {a:"Filipina Bonifacio",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b1100,000",buyoutDiff:"-\u20b1100,000",cross:0,crossTarget:20,crossDiff:"-20"},
-    {a:"Sharon SanJuan",cur:2,prev:5,avg:"\u20b15,459.50",buyout:"\u20b10",targetBuyout:"\u20b1200,000",buyoutDiff:"-\u20b1200,000",cross:1,crossTarget:65,crossDiff:"-64"},
-    {a:"Christian Tad-y",cur:0,prev:2,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b170,000",buyoutDiff:"-\u20b170,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Merly Palomares",cur:0,prev:4,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b1195,000",buyoutDiff:"-\u20b1195,000",cross:0,crossTarget:35,crossDiff:"-35"},
-    {a:"Marianne Visda",cur:2,prev:0,avg:"\u20b13,169.50",buyout:"\u20b10",targetBuyout:"\u20b165,000",buyoutDiff:"-\u20b165,000",cross:1,crossTarget:15,crossDiff:"-14"},
-    {a:"Joyce Malapitan",cur:3,prev:4,avg:"\u20b14,031.00",buyout:"\u20b10",targetBuyout:"\u20b1180,000",buyoutDiff:"-\u20b1180,000",cross:3,crossTarget:25,crossDiff:"-22"},
-    {a:"Lanlie Mayor",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b190,000",buyoutDiff:"-\u20b190,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Carmina Fernandez",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b165,000",buyoutDiff:"-\u20b165,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Raysan Garganta",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b165,000",buyoutDiff:"-\u20b165,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Trina Idaloy",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b165,000",buyoutDiff:"-\u20b165,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Mary Fontanilla",cur:6,prev:8,avg:"\u20b12,172.00",buyout:"\u20b10",targetBuyout:"\u20b1140,000",buyoutDiff:"-\u20b1140,000",cross:1,crossTarget:55,crossDiff:"-54"},
-    {a:"John Jamero",cur:0,prev:1,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b170,000",buyoutDiff:"-\u20b170,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Reynalyn Roco",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b195,000",buyoutDiff:"-\u20b195,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Dhanica Dadoya",cur:2,prev:5,avg:"\u20b11,500.00",buyout:"\u20b10",targetBuyout:"\u20b1200,000",buyoutDiff:"-\u20b1200,000",cross:0,crossTarget:55,crossDiff:"-55"},
-    {a:"Jasmin Aruta",cur:0,prev:2,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b1120,000",buyoutDiff:"-\u20b1120,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Karen Dilig",cur:0,prev:5,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b175,000",buyoutDiff:"-\u20b175,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Jonaliza Guevarra",cur:0,prev:5,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b190,000",buyoutDiff:"-\u20b190,000",cross:0,crossTarget:15,crossDiff:"-15"},
-    {a:"Bhea Cuenca",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b165,000",buyoutDiff:"-\u20b165,000",cross:0,crossTarget:15,crossDiff:"-15"}
+    {a:"Jubel Siagan",cur:2,prev:6,avg:"\u20b13,099.00",buyout:"\u20b10",targetBuyout:"\u20b145",buyoutDiff:"-\u20b145",cross:1,crossTarget:25,crossDiff:"-24"},
+    {a:"Filipina Bonifacio",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b135",buyoutDiff:"-\u20b135",cross:0,crossTarget:20,crossDiff:"-20"},
+    {a:"Sharon SanJuan",cur:2,prev:5,avg:"\u20b15,459.50",buyout:"\u20b10",targetBuyout:"\u20b180",buyoutDiff:"-\u20b180",cross:1,crossTarget:65,crossDiff:"-64"},
+    {a:"Christian Tad-y",cur:2,prev:2,avg:"\u20b14,368.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Merly Palomares",cur:0,prev:4,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b170",buyoutDiff:"-\u20b170",cross:0,crossTarget:35,crossDiff:"-35"},
+    {a:"Marianne Visda",cur:5,prev:0,avg:"\u20b13,053.40",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:3,crossTarget:15,crossDiff:"-12"},
+    {a:"Joyce Malapitan",cur:4,prev:4,avg:"\u20b13,518.25",buyout:"\u20b10",targetBuyout:"\u20b165",buyoutDiff:"-\u20b165",cross:3,crossTarget:25,crossDiff:"-22"},
+    {a:"Lanlie Mayor",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b135",buyoutDiff:"-\u20b135",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Carmina Fernandez",cur:2,prev:0,avg:"\u20b12,640.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Raysan Garganta",cur:1,prev:0,avg:"\u20b12,640.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Trina Idaloy",cur:1,prev:0,avg:"\u20b11,970.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Mary Fontanilla",cur:8,prev:8,avg:"\u20b12,421.25",buyout:"\u20b10",targetBuyout:"\u20b155",buyoutDiff:"-\u20b155",cross:1,crossTarget:55,crossDiff:"-54"},
+    {a:"John Jamero",cur:0,prev:1,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Reynalyn Roco",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b130",buyoutDiff:"-\u20b130",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Dhanica Dadoya",cur:4,prev:5,avg:"\u20b11,941.00",buyout:"\u20b10",targetBuyout:"\u20b180",buyoutDiff:"-\u20b180",cross:6,crossTarget:55,crossDiff:"-49"},
+    {a:"Jasmin Aruta",cur:1,prev:2,avg:"\u20b11,965.00",buyout:"\u20b10",targetBuyout:"\u20b140",buyoutDiff:"-\u20b140",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Karen Dilig",cur:0,prev:5,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"},
+    {a:"Jonaliza Guevarra",cur:3,prev:5,avg:"\u20b14,222.67",buyout:"\u20b10",targetBuyout:"\u20b130",buyoutDiff:"-\u20b130",cross:2,crossTarget:15,crossDiff:"-13"},
+    {a:"Bhea Cuenca",cur:0,prev:0,avg:"\u20b10.00",buyout:"\u20b10",targetBuyout:"\u20b125",buyoutDiff:"-\u20b125",cross:0,crossTarget:15,crossDiff:"-15"}
   ],
-  total:{cur:17,prev:47,diff:"-30",pct:"-64%",avg:"\u20b13,034.18",buyout:"\u20b10",targetBuyout:"\u20b12,095,000",buyoutDiff:"-\u20b12,095,000",cross:7,crossTarget:460,crossDiff:"-453"},
+  total:{cur:35,prev:47,diff:"-12",pct:"-26%",avg:"\u20b13,052.86",buyout:"\u20b10",targetBuyout:"\u20b1765",buyoutDiff:"-\u20b1765",cross:17,crossTarget:460,crossDiff:"-443"},
   pace:{above:0,below:0},
   august:{cur:849,prev:581,diff:"+268",pct:"46%",avgCur:"\u20B12,514.73",avgPrev:"\u20B12,830.88",callsCur:"8,964",callsPrev:"5,301",convCur:"9%",convPrev:"11%"}
 };
