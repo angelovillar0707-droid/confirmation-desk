@@ -240,30 +240,30 @@ async function buildRanking() {
 }
 
 // ---------- Performance Update ----------
+// This tab now tracks Buyout and Cross Sale against agent-level monthly
+// targets the sheet itself defines ("Target Buyout" / "Cross-sale Target"),
+// rather than against last month's figures  -  so the Difference for each is
+// computed here as actual minus target (not fetched from the sheet's own
+// "Difference" columns, since that label repeats several times across this
+// tab for different pairs and each occurrence would need to be positionally
+// disambiguated for no real benefit over just recomputing it).
 async function buildPerf(existingAugustLiteral) {
   const sheetLabel = "Performance Update";
   const { rows, headerRowIdx } = await getValidatedSheetByGid(
-    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Calls Handled", "Total Buyout", "Total Sales"], sheetLabel
+    GID_PERF, ["Agent", "Current MTD", "AVERAGE CHECK", "Total Buyout", "Target Buyout", "Cross Sale", "Cross-sale Target"], sheetLabel
   );
   const header = rows[headerRowIdx];
   const agentCol = requireCol(header, "Agent", {}, sheetLabel);
   const curCol = requireCol(header, "Current MTD", { mode: "contains" }, sheetLabel);
   const prevCol = requireCol(header, "Previous MTD", { mode: "contains" }, sheetLabel);
-  const diffCol = requireCol(header, "Difference", { mode: "contains", exclude: "whole" }, sheetLabel);
-  const pctCol = requireCol(header, "% Change", { mode: "contains", exclude: "whole" }, sheetLabel);
   const avgCol = requireCol(header, "AVERAGE CHECK", { mode: "exact" }, sheetLabel);
-  const callsCol = requireCol(header, "Calls Handled", { mode: "contains", exclude: "previous" }, sheetLabel);
-  const convCol = requireCol(header, "Conversion %", { mode: "contains", exclude: "previous" }, sheetLabel);
-  // "Total Buyout" / "Previous Month Buyout": the original pair of currency
-  // columns from this tab (this used to be labeled "Total Sales" on the
-  // sheet before it was renamed to "Buyout" to make room for a genuinely
-  // separate "Total Sales" pair living next to Average Check  -  see below).
-  const buyoutCol = requireCol(header, "Total Buyout", { mode: "contains", exclude: "previous" }, sheetLabel);
-  const buyoutPrevCol = requireCol(header, "Previous Month Buyout", { mode: "contains" }, sheetLabel);
-  // "Total Sales" / "Total Sales Previous Month": a newer, separate pair of
-  // currency columns that live next to Average Check.
-  const salesCol = requireCol(header, "Total Sales", { mode: "contains", exclude: "previous" }, sheetLabel);
-  const salesPrevCol = requireCol(header, "Total Sales Previous Month", { mode: "contains" }, sheetLabel);
+  const buyoutCol = requireCol(header, "Total Buyout", { mode: "contains" }, sheetLabel);
+  const targetBuyoutCol = requireCol(header, "Target Buyout", { mode: "contains" }, sheetLabel);
+  // "Cross Sale" (a plain count) vs "Cross-sale Target": the hyphen in
+  // "Cross-sale Target" keeps a contains-match for "Cross Sale" (with a
+  // space) from also matching the target column.
+  const crossCol = requireCol(header, "Cross Sale", { mode: "contains" }, sheetLabel);
+  const crossTargetCol = requireCol(header, "Cross-sale Target", { mode: "contains" }, sheetLabel);
 
   // This table has several things above/below the real per-agent rows that
   // aren't agents: an "August" full-month recap row right at the top (its
@@ -298,25 +298,23 @@ async function buildPerf(existingAugustLiteral) {
     if (DROP_LABELS.some(l => agentNorm.includes(l))) continue;
     if (agentNorm.includes("total")) { pastAgentTotal = true; continue; } // the sheet's own (unrelated) Total row ends the per-agent block  -  but pace KPI rows still follow it
     if (pastAgentTotal) continue; // trailing KPI/month-recap noise after the Total row
+    const buyoutNum = Number(esc(r[buyoutCol]).replace(/[^0-9.\-]/g, "")) || 0;
+    const targetBuyoutNum = Number(esc(r[targetBuyoutCol]).replace(/[^0-9.\-]/g, "")) || 0;
+    const crossNum = Number(esc(r[crossCol]).replace(/[^0-9.\-]/g, "")) || 0;
+    const crossTargetNum = Number(esc(r[crossTargetCol]).replace(/[^0-9.\-]/g, "")) || 0;
     agentRows.push({
       a: agent,
       cur: Number(esc(r[curCol]).replace(/[^0-9.\-]/g, "")) || 0,
       prev: Number(esc(r[prevCol]).replace(/[^0-9.\-]/g, "")) || 0,
-      diff: esc(r[diffCol]),
-      pct: esc(r[pctCol]),
       avg: esc(r[avgCol]),
       avgNum: Number(esc(r[avgCol]).replace(/[^0-9.\-]/g, "")) || 0,
-      calls: esc(r[callsCol]).replace(/"/g, ""),
-      callsNum: Number(esc(r[callsCol]).replace(/[^0-9.\-]/g, "")) || 0,
-      conv: esc(r[convCol]),
-      buyout: esc(r[buyoutCol]),
-      buyoutNum: Number(esc(r[buyoutCol]).replace(/[^0-9.\-]/g, "")) || 0,
-      buyoutPrev: esc(r[buyoutPrevCol]),
-      buyoutPrevNum: Number(esc(r[buyoutPrevCol]).replace(/[^0-9.\-]/g, "")) || 0,
-      sales: esc(r[salesCol]),
-      salesNum: Number(esc(r[salesCol]).replace(/[^0-9.\-]/g, "")) || 0,
-      salesPrev: esc(r[salesPrevCol]),
-      salesPrevNum: Number(esc(r[salesPrevCol]).replace(/[^0-9.\-]/g, "")) || 0,
+      buyoutNum, targetBuyoutNum,
+      buyout: "\u20B1" + buyoutNum.toLocaleString("en-US"),
+      targetBuyout: "\u20B1" + targetBuyoutNum.toLocaleString("en-US"),
+      buyoutDiff: fmtCurrencyDiff(buyoutNum, targetBuyoutNum),
+      cross: crossNum,
+      crossTarget: crossTargetNum,
+      crossDiff: fmtDiff(crossNum, crossTargetNum),
     });
   }
   if (agentRows.length < 3) throw new Error(`${sheetLabel}: fewer than 3 valid agent rows parsed  -  refusing to publish.`);
@@ -336,38 +334,30 @@ async function buildPerf(existingAugustLiteral) {
 
   const totalCur = agentRows.reduce((s, r) => s + r.cur, 0);
   const totalPrev = agentRows.reduce((s, r) => s + r.prev, 0);
-  const totalCalls = agentRows.reduce((s, r) => s + r.callsNum, 0);
   const totalBuyout = agentRows.reduce((s, r) => s + r.buyoutNum, 0);
-  const totalBuyoutPrev = agentRows.reduce((s, r) => s + r.buyoutPrevNum, 0);
-  const totalSales = agentRows.reduce((s, r) => s + r.salesNum, 0);
-  const totalSalesPrev = agentRows.reduce((s, r) => s + r.salesPrevNum, 0);
-  // Average check weighted by each agent's confirmed-order volume, and
-  // conversion recomputed the same way the per-agent conversion values
-  // check out (confirmed orders / calls handled)  -  both real aggregates of
-  // the agents actually in the table, not a stray sheet total.
+  const totalTargetBuyout = agentRows.reduce((s, r) => s + r.targetBuyoutNum, 0);
+  const totalCross = agentRows.reduce((s, r) => s + r.cross, 0);
+  const totalCrossTarget = agentRows.reduce((s, r) => s + r.crossTarget, 0);
+  // Average check weighted by each agent's confirmed-order volume  -  a real
+  // aggregate of the agents actually in the table, not a stray sheet total.
   const totalAvg = totalCur ? (agentRows.reduce((s, r) => s + r.avgNum * r.cur, 0) / totalCur) : 0;
-  const totalConv = totalCalls ? Math.round((totalCur / totalCalls) * 100) : 0;
   const totalRow = {
     cur: totalCur, prev: totalPrev,
     diff: fmtDiff(totalCur, totalPrev),
     pct: fmtPct(totalCur, totalPrev),
     avg: "\u20B1" + totalAvg.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }),
-    calls: totalCalls.toLocaleString("en-US"),
-    conv: totalConv + "%",
     buyout: "\u20B1" + totalBuyout.toLocaleString("en-US"),
-    buyoutPrev: "\u20B1" + totalBuyoutPrev.toLocaleString("en-US"),
-    buyoutDiff: fmtCurrencyDiff(totalBuyout, totalBuyoutPrev),
-    buyoutPct: fmtPct(totalBuyout, totalBuyoutPrev),
-    sales: "\u20B1" + totalSales.toLocaleString("en-US"),
-    salesPrev: "\u20B1" + totalSalesPrev.toLocaleString("en-US"),
-    salesDiff: fmtCurrencyDiff(totalSales, totalSalesPrev),
-    salesPct: fmtPct(totalSales, totalSalesPrev),
+    targetBuyout: "\u20B1" + totalTargetBuyout.toLocaleString("en-US"),
+    buyoutDiff: fmtCurrencyDiff(totalBuyout, totalTargetBuyout),
+    cross: totalCross,
+    crossTarget: totalCrossTarget,
+    crossDiff: fmtDiff(totalCross, totalCrossTarget),
   };
 
   const rowsBody = agentRows
-    .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},diff:${jstr(r.diff)},pct:${jstr(r.pct)},avg:${jstr(r.avg)},calls:${jstr(r.calls)},conv:${jstr(r.conv)},buyout:${jstr(r.buyout)},buyoutPrev:${jstr(r.buyoutPrev)},sales:${jstr(r.sales)},salesPrev:${jstr(r.salesPrev)}}`)
+    .map(r => `    {a:${jstr(r.a)},cur:${r.cur},prev:${r.prev},avg:${jstr(r.avg)},buyout:${jstr(r.buyout)},targetBuyout:${jstr(r.targetBuyout)},buyoutDiff:${jstr(r.buyoutDiff)},cross:${r.cross},crossTarget:${r.crossTarget},crossDiff:${jstr(r.crossDiff)}}`)
     .join(",\n");
-  const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},calls:${jstr(totalRow.calls)},conv:${jstr(totalRow.conv)},buyout:${jstr(totalRow.buyout)},buyoutPrev:${jstr(totalRow.buyoutPrev)},buyoutDiff:${jstr(totalRow.buyoutDiff)},buyoutPct:${jstr(totalRow.buyoutPct)},sales:${jstr(totalRow.sales)},salesPrev:${jstr(totalRow.salesPrev)},salesDiff:${jstr(totalRow.salesDiff)},salesPct:${jstr(totalRow.salesPct)}}`;
+  const totalBody = `{cur:${totalRow.cur},prev:${totalRow.prev},diff:${jstr(totalRow.diff)},pct:${jstr(totalRow.pct)},avg:${jstr(totalRow.avg)},buyout:${jstr(totalRow.buyout)},targetBuyout:${jstr(totalRow.targetBuyout)},buyoutDiff:${jstr(totalRow.buyoutDiff)},cross:${totalRow.cross},crossTarget:${totalRow.crossTarget},crossDiff:${jstr(totalRow.crossDiff)}}`;
 
   const paceBody = `{above:${paceAbove},below:${paceBelow}}`;
 
